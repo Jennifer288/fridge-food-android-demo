@@ -222,6 +222,22 @@ function formatRemainingDays(days) {
   return `${days} 天后到期`;
 }
 
+function getFreshnessPill(food) {
+  if (food.remainingDays < 0) {
+    return { tone: "expire", label: "已过期" };
+  }
+
+  if (food.remainingDays === 0) {
+    return { tone: "expire", label: "今天到期" };
+  }
+
+  if (food.remainingDays <= 3) {
+    return { tone: "soon", label: `${food.remainingDays}天后` };
+  }
+
+  return { tone: "fresh", label: "新鲜" };
+}
+
 function getReminderText(reminder) {
   const text = {
     expired: "已过期",
@@ -292,25 +308,29 @@ if (typeof document !== "undefined") {
       return;
     }
 
-    inventoryList.innerHTML = filteredFoods.map((food) => `
-      <article class="food-card state-${food.state}" data-food-id="${food.id}" tabindex="0" role="button" aria-label="查看 ${food.name} 详情">
-        <div class="food-icon accent-${food.accent}" aria-hidden="true">${food.name.slice(0, 1)}</div>
-        <div class="food-main">
-          <div class="food-title-row">
-            <h3>${food.name}</h3>
-            <span class="state-pill">${STATE_LABELS[food.state]}</span>
+    inventoryList.innerHTML = filteredFoods.map((food) => {
+      const pill = getFreshnessPill(food);
+
+      return `
+        <article class="food-card state-${food.state} freshness-${pill.tone}" data-food-id="${food.id}" tabindex="0" role="button" aria-label="查看 ${food.name} 详情">
+          <div class="food-icon accent-${food.accent}" aria-hidden="true">${food.name.slice(0, 1)}</div>
+          <div class="food-main">
+            <div class="food-title-row">
+              <h3>${food.name}</h3>
+              <span class="state-pill pill-${pill.tone}">${pill.label}</span>
+            </div>
+            <p>${food.categoryLabel} · ${food.zone}</p>
+            <div class="freshness-line">
+              <span><b>${food.freshness}%</b> 新鲜度</span>
+              <span>${formatRemainingDays(food.remainingDays)}</span>
+            </div>
+            <div class="freshness-track" aria-hidden="true">
+              <i style="width:${food.freshness}%"></i>
+            </div>
           </div>
-          <p>${food.categoryLabel} · ${food.zone}</p>
-          <div class="freshness-line">
-            <span><b>${food.freshness}%</b> 新鲜度</span>
-            <span>${formatRemainingDays(food.remainingDays)}</span>
-          </div>
-          <div class="freshness-track" aria-hidden="true">
-            <i style="width:${food.freshness}%"></i>
-          </div>
-        </div>
-      </article>
-    `).join("");
+        </article>
+      `;
+    }).join("");
   }
 
   function renderReminders() {
@@ -346,6 +366,8 @@ if (typeof document !== "undefined") {
       return;
     }
 
+    const pill = getFreshnessPill(food);
+
     detailContent.innerHTML = `
       <div class="detail-heading">
         <div class="food-icon accent-${food.accent}" aria-hidden="true">${food.name.slice(0, 1)}</div>
@@ -353,6 +375,7 @@ if (typeof document !== "undefined") {
           <h2>${food.name}</h2>
           <p>${food.categoryLabel} · ${food.zone}</p>
         </div>
+        <span class="state-pill pill-${pill.tone}">${pill.label}</span>
       </div>
       <div class="detail-score">
         <span>${food.freshness}%</span>
@@ -461,5 +484,6 @@ if (typeof module !== "undefined") {
     filterFoodsByCategory,
     countUrgentReminders,
     formatRemainingDays,
+    getFreshnessPill,
   };
 }

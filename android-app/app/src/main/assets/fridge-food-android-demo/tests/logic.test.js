@@ -8,6 +8,7 @@ const {
   getReminderFlags,
   filterFoodsByCategory,
   countUrgentReminders,
+  getFreshnessPill,
 } = require("../script.js");
 
 const foods = createRecognizedFoods();
@@ -32,5 +33,22 @@ assert.strictEqual(filterFoodsByCategory(foods, CATEGORIES.MEAT_EGG_DAIRY).lengt
 assert.strictEqual(filterFoodsByCategory(foods, CATEGORIES.FRUIT_VEG).length, 3);
 assert.strictEqual(filterFoodsByCategory(foods, CATEGORIES.FROZEN).length, 1);
 assert.strictEqual(countUrgentReminders(foods), 5);
+
+assert.deepStrictEqual(getFreshnessPill({ remainingDays: 5 }), {
+  tone: "fresh",
+  label: "新鲜",
+});
+assert.deepStrictEqual(getFreshnessPill({ remainingDays: 2 }), {
+  tone: "soon",
+  label: "2天后",
+});
+assert.deepStrictEqual(getFreshnessPill({ remainingDays: 0 }), {
+  tone: "expire",
+  label: "今天到期",
+});
+assert.deepStrictEqual(getFreshnessPill({ remainingDays: -1 }), {
+  tone: "expire",
+  label: "已过期",
+});
 
 console.log("logic tests passed");
