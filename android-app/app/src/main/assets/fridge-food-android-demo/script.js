@@ -455,6 +455,33 @@ function renderFoodCard(food, index = 0) {
   `;
 }
 
+function renderFoodDetailPanel(food) {
+  const pill = getFreshnessPill(food);
+
+  return `
+    <div class="detail-heading">
+      ${renderFoodPhoto(food)}
+      <div>
+        <h2>${escapeHtml(food.name)}</h2>
+        <p>${escapeHtml(food.categoryLabel)} · ${escapeHtml(food.zone)}</p>
+      </div>
+      <span class="state-pill pill-${pill.tone}">${pill.label}</span>
+    </div>
+    <div class="detail-score">
+      <span data-count-up="${food.freshness}" data-count-suffix="%">0%</span>
+      <div class="freshness-track" aria-hidden="true"><i data-freshness-value="${food.freshness}" style="--freshness-width:${food.freshness}%"></i></div>
+    </div>
+    <dl class="detail-grid">
+      <div><dt>状态</dt><dd>${STATE_LABELS[food.state]}</dd></div>
+      <div><dt>剩余</dt><dd>${formatRemainingDays(food.remainingDays)}</dd></div>
+      <div><dt>购入</dt><dd>${Math.abs(food.purchaseDay)} 天前</dd></div>
+      <div><dt>提醒</dt><dd>${food.reminders.length ? food.reminders.map(getReminderText).join(" / ") : "暂无"}</dd></div>
+    </dl>
+    <p class="detail-tip"><b>建议：</b>${escapeHtml(food.action)}</p>
+    <p class="detail-tip"><b>存放：</b>${escapeHtml(food.storageTip)}</p>
+  `;
+}
+
 function getHeroStyle(food) {
   const hero = food.hero;
   return `--hero-left:${hero.x * 100}%;--hero-top:${hero.y * 100}%;--hero-width:${hero.w * 100}%;--hero-height:${hero.h * 100}%;`;
@@ -800,6 +827,7 @@ if (typeof document !== "undefined") {
     foods: [],
     activeCategory: CATEGORIES.ALL,
     activePage: "inventory",
+    selectedFoodId: "",
     highlightedFoodId: "",
     scanned: false,
     scanTimer: 0,
@@ -865,6 +893,36 @@ if (typeof document !== "undefined") {
     }, { once: true });
   }
 
+  function getFoodSelector(foodId) {
+    const safeId = typeof CSS !== "undefined" && CSS.escape
+      ? CSS.escape(foodId)
+      : foodId.replace(/"/g, '\\"');
+    return `[data-food-id="${safeId}"]`;
+  }
+
+  function replayAnimationClass(element, className) {
+    if (!element) {
+      return;
+    }
+
+    element.classList.remove(className);
+    void element.offsetWidth;
+    element.classList.add(className);
+    element.addEventListener("animationend", () => {
+      element.classList.remove(className);
+    }, { once: true });
+  }
+
+  function focusFoodInteraction(foodId) {
+    const foodSelector = getFoodSelector(foodId);
+    const foodCard = document.querySelector(`.food-card${foodSelector}`);
+    replayAnimationClass(foodCard, "food-card-tap");
+
+    document.querySelectorAll(`.hero-detection-box${foodSelector}`).forEach((box) => {
+      replayAnimationClass(box, "detection-focus");
+    });
+  }
+
   function renderSheetDetectionLayer() {
     const sheetDetectionLayer = getElement("sheetDetectionLayer");
     if (!sheetDetectionLayer) {
@@ -892,38 +950,9 @@ if (typeof document !== "undefined") {
       return;
     }
 
-    const pill = getFreshnessPill(food);
-
-    clearTimeout(appState.highlightTimer);
-    appState.highlightedFoodId = food.id;
-    renderApp();
-    appState.highlightTimer = window.setTimeout(() => {
-      appState.highlightedFoodId = "";
-      renderApp();
-    }, 1000);
-
-    detailContent.innerHTML = `
-      <div class="detail-heading">
-        ${renderFoodPhoto(food)}
-        <div>
-          <h2>${escapeHtml(food.name)}</h2>
-          <p>${escapeHtml(food.categoryLabel)} · ${escapeHtml(food.zone)}</p>
-        </div>
-        <span class="state-pill pill-${pill.tone}">${pill.label}</span>
-      </div>
-      <div class="detail-score">
-        <span data-count-up="${food.freshness}" data-count-suffix="%">0%</span>
-        <div class="freshness-track" aria-hidden="true"><i data-freshness-value="${food.freshness}" style="--freshness-width:${food.freshness}%"></i></div>
-      </div>
-      <dl class="detail-grid">
-        <div><dt>状态</dt><dd>${STATE_LABELS[food.state]}</dd></div>
-        <div><dt>剩余</dt><dd>${formatRemainingDays(food.remainingDays)}</dd></div>
-        <div><dt>购入</dt><dd>${Math.abs(food.purchaseDay)} 天前</dd></div>
-        <div><dt>提醒</dt><dd>${food.reminders.length ? food.reminders.map(getReminderText).join(" / ") : "暂无"}</dd></div>
-      </dl>
-      <p class="detail-tip"><b>建议：</b>${escapeHtml(food.action)}</p>
-      <p class="detail-tip"><b>存放：</b>${escapeHtml(food.storageTip)}</p>
-    `;
+    appState.selectedFoodId = food.id;
+    focusFoodInteraction(food.id);
+    detailContent.innerHTML = renderFoodDetailPanel(food);
 
     requestAnimationFrame(() => animateRenderedMotion(detailContent));
 

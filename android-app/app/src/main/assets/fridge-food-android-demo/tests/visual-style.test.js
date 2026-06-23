@@ -57,7 +57,7 @@ assert(css.includes("@media (prefers-reduced-motion: reduce)"), "Reduced motion 
 assert(css.includes("animation: none !important;"), "Reduced motion should disable animations");
 assert(css.includes("transition: none !important;"), "Reduced motion should disable transitions");
 
-for (const keyframe of ["scanSweep", "boxPop", "cardRise", "iconTap", "expirePulse", "spin", "livePulse"]) {
+for (const keyframe of ["scanSweep", "boxPop", "cardRise", "iconTap", "expirePulse", "spin", "livePulse", "foodCardTap", "detectionFocus"]) {
   assert(css.includes(`@keyframes ${keyframe}`), `Missing ${keyframe} keyframes`);
 }
 
@@ -98,6 +98,8 @@ assert(css.includes("animation-delay: var(--box-delay);"), "Detection boxes shou
 assert(css.includes("transition: width 700ms cubic-bezier(.22,.61,.36,1);"), "Freshness bars should animate width");
 assert(css.includes("box-shadow: inset 0 1px 0 rgba(255,255,255,.35);"), "Freshness bars should include subtle highlight");
 assert(css.includes(".card-enter"), "Inventory cards should use card enter animation");
+assert(css.includes(".food-card-tap"), "Selected food card should support isolated tap feedback");
+assert(css.includes(".detection-focus"), "Selected detection box should support isolated focus feedback");
 assert(css.includes(".nav-indicator"), "Bottom nav indicator should be styled");
 assert(css.includes(".icon-tap"), "Nav icons should support tap animation");
 assert(css.includes(".wide-action.is-loading::before"), "Loading spinner should be available on scan button");

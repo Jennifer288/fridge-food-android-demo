@@ -26,6 +26,30 @@ const foods = createRecognizedFoods();
 const html = fs.readFileSync(path.resolve(__dirname, "..", "index.html"), "utf8");
 const script = fs.readFileSync(path.resolve(__dirname, "..", "script.js"), "utf8");
 
+function extractFunctionBody(source, name) {
+  const marker = `function ${name}`;
+  const start = source.indexOf(marker);
+  assert(start !== -1, `${name} should exist`);
+
+  const braceStart = source.indexOf("{", start);
+  assert(braceStart !== -1, `${name} should have a function body`);
+
+  let depth = 0;
+  for (let index = braceStart; index < source.length; index += 1) {
+    const char = source[index];
+    if (char === "{") {
+      depth += 1;
+    }
+    if (char === "}") {
+      depth -= 1;
+    }
+    if (depth === 0) {
+      return source.slice(braceStart + 1, index);
+    }
+  }
+  throw new Error(`Could not extract ${name}`);
+}
+
 assert.strictEqual(DEMO_TODAY, 0);
 assert.strictEqual(CALIBRATE, false, "CALIBRATE should default to false in published builds");
 assert(Array.isArray(FOODS), "FOODS should be exported as the single source dataset");
@@ -41,6 +65,23 @@ assert(script.includes("runScanBeam"), "Scan reveal should create a scan beam be
 assert(script.includes("appState.foods = createRecognizedFoods();"), "Scan simulation should keep assigning recognized foods");
 assert(script.includes("appState.scanned = true;"), "Scan simulation should keep setting scanned state");
 assert(script.includes("renderApp();"), "Scan simulation should still render the app after recognition");
+assert(script.includes("function renderFoodDetailPanel("), "Detail panel should have a local render helper");
+assert(script.includes("function focusFoodInteraction("), "Food clicks should use localized feedback");
+
+const openDetailBody = extractFunctionBody(script, "openDetail");
+assert(!openDetailBody.includes("renderApp("), "Opening a food detail should not rerender the whole app");
+assert(!openDetailBody.includes("renderInventoryList("), "Opening a food detail should not rerender inventory");
+assert(!openDetailBody.includes("renderPageContent("), "Opening a food detail should not rerender page content");
+assert(!openDetailBody.includes("renderSheetDetectionLayer("), "Opening a food detail should not rerender hero detections");
+assert(!openDetailBody.includes("highlightTimer"), "Opening a food detail should not schedule a full-app highlight rerender");
+assert(openDetailBody.includes("renderFoodDetailPanel(food)"), "Opening a food detail should only refresh the detail panel markup");
+assert(openDetailBody.includes("focusFoodInteraction(food.id)"), "Opening a food detail should only animate the selected food");
+
+const focusFoodBody = extractFunctionBody(script, "focusFoodInteraction");
+assert(focusFoodBody.includes("food-card-tap"), "Food click feedback should target the selected food card");
+assert(focusFoodBody.includes("detection-focus"), "Food click feedback should target the matching detection box");
+assert(!focusFoodBody.includes("card-enter"), "Food click feedback should not replay card entrance animation");
+assert(!focusFoodBody.includes("renderApp("), "Food click feedback should not rerender the app");
 assert.strictEqual(calculateRemainingDays({ expiryDay: 3 }, DEMO_TODAY), 3);
 assert.strictEqual(evaluateFreshnessState({ freshness: 86, remainingDays: 3 }), "fresh");
 assert.strictEqual(evaluateFreshnessState({ freshness: 68, remainingDays: 1 }), "eat-soon");
