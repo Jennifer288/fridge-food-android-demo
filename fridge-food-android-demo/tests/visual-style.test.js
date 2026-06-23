@@ -38,7 +38,7 @@ for (const navId of ["inventory", "reminders", "scan", "recipes", "profile"]) {
   assert(html.includes(`data-nav="${navId}"`), `Missing bottom nav button for ${navId}`);
 }
 
-for (const selector of [".detection-layer", ".detection-box", ".page-view", ".recipe-card", ".profile-stat"]) {
+for (const selector of [".hero-scene-layer", ".detection-layer", ".hero-food-scene-item", ".hero-detection-box", ".hero-food-img", ".bbox-label", ".fridge-stage-bg", ".page-view", ".recipe-card", ".profile-stat"]) {
   assert(css.includes(selector), `Missing visual style for ${selector}`);
 }
 
@@ -66,6 +66,23 @@ const cameraFabBlock = css.match(/\.camera-fab\s*\{[\s\S]*?\n\}/);
 assert(cameraFabBlock, "Missing camera nav CSS block");
 assert(!cameraFabBlock[0].includes("transform:"), "Bottom nav camera item should not be raised with transform");
 
+const labelBlock = css.match(/\.bbox-label\s*\{[\s\S]*?\n\}/);
+assert(labelBlock, "Missing hero label CSS block");
+assert(!labelBlock[0].includes("text-overflow"), "Hero label should not use text-overflow");
+assert(!labelBlock[0].includes("ellipsis"), "Hero label should not ellipsize text");
+assert(labelBlock[0].includes("white-space: normal;"), "Hero label should be allowed to wrap when needed");
+
+const sceneItemBlock = css.match(/\.hero-food-scene-item\s*\{[\s\S]*?\n\}/);
+assert(sceneItemBlock, "Missing hero scene item CSS block");
+assert(sceneItemBlock[0].includes("background: transparent;"), "Hero food images should sit directly in the fridge scene");
+assert(sceneItemBlock[0].includes("border: none;"), "Hero food scene items should not look like bordered cards");
+assert(sceneItemBlock[0].includes("box-shadow: none;"), "Hero food scene items should not use card shadows");
+
+const detectionBoxBlock = css.match(/\.hero-detection-box\s*\{[\s\S]*?\n\}/);
+assert(detectionBoxBlock, "Missing hero detection box CSS block");
+assert(detectionBoxBlock[0].includes("border: 1.5px solid var(--detect-color);"), "Detection boxes should be thin overlays");
+assert(detectionBoxBlock[0].includes("background: transparent;"), "Detection boxes should not become food cards");
+
 for (const forbidden of ["--terracotta", "--ochre", "--amber", "--blue", "--line", "#f97316", "#c66b3d"]) {
   assert(!css.includes(forbidden), `Forbidden legacy accent remains: ${forbidden}`);
 }
@@ -75,11 +92,15 @@ const borderDeclarations = css
   .map((line) => line.trim())
   .filter((line) => line.startsWith("border:") || line.startsWith("border-top:"));
 
-assert.deepStrictEqual(
-  borderDeclarations,
-  ["border: 0;"],
-  `Unexpected border declarations: ${borderDeclarations.join(", ")}`
-);
+const allowedBorders = new Set([
+  "border: 0;",
+  "border: none;",
+  "border: 1.5px solid var(--detect-color);",
+]);
+
+for (const declaration of borderDeclarations) {
+  assert(allowedBorders.has(declaration), `Unexpected border declaration: ${declaration}`);
+}
 
 const radiusValues = [...css.matchAll(/border-radius:\s*([^;]+);/g)].map((match) => match[1].trim());
 const allowedRadiusValues = new Set([
@@ -89,6 +110,8 @@ const allowedRadiusValues = new Set([
   "inherit",
   "0",
   "6px",
+  "8px",
+  "10px",
   "var(--r-card) var(--r-card) 0 0",
 ]);
 

@@ -71,14 +71,15 @@ for (const food of foods) {
   assert(/^assets\/foods\/.+\.(jpg|jpeg|png|webp)$/i.test(food.image), `${food.name} image must be a local food asset`);
   assert(!/^https?:\/\//i.test(food.image), `${food.name} image must not be a remote URL`);
   assert(fs.existsSync(path.resolve(__dirname, "..", food.image)), `${food.name} image file does not exist`);
-  assert(food.box, `${food.name} is missing box`);
-  assert(!food.bbox, `${food.name} should use normalized box instead of legacy bbox`);
+  assert(food.hero, `${food.name} is missing hero coordinates`);
+  assert(!food.box, `${food.name} should use hero coordinates instead of legacy box`);
+  assert(!food.bbox, `${food.name} should not use legacy bbox`);
   for (const key of ["x", "y", "w", "h"]) {
-    assert.strictEqual(typeof food.box[key], "number", `${food.name} box.${key} must be numeric`);
-    assert(food.box[key] >= 0 && food.box[key] <= 1, `${food.name} box.${key} must be normalized between 0 and 1`);
+    assert.strictEqual(typeof food.hero[key], "number", `${food.name} hero.${key} must be numeric`);
+    assert(food.hero[key] >= 0 && food.hero[key] <= 1, `${food.name} hero.${key} must be normalized between 0 and 1`);
   }
-  assert(food.box.x + food.box.w <= 1, `${food.name} box should fit horizontally`);
-  assert(food.box.y + food.box.h <= 1, `${food.name} box should fit vertically`);
+  assert(food.hero.x + food.hero.w <= 1, `${food.name} hero should fit horizontally`);
+  assert(food.hero.y + food.hero.h <= 1, `${food.name} hero should fit vertically`);
 }
 
 const beefCard = renderFoodCard(foods[0]);
@@ -88,14 +89,39 @@ assert(beefCard.includes('class="food-thumb-fallback"'), "Food card should inclu
 assert(!beefCard.includes("http://") && !beefCard.includes("https://"), "Food card should not render remote images");
 
 const detectionOverlay = renderDetectionOverlay(foods);
-assert.strictEqual((detectionOverlay.match(/class="detection-box/g) || []).length, foods.length);
-assert.strictEqual((detectionOverlay.match(/data-detection-food-id=/g) || []).length, foods.length);
+assert.strictEqual((detectionOverlay.match(/class="hero-food-scene-item/g) || []).length, foods.length);
+assert.strictEqual((detectionOverlay.match(/class="hero-detection-box/g) || []).length, foods.length);
+assert.strictEqual((detectionOverlay.match(/class="hero-food-img/g) || []).length, foods.length);
+assert.strictEqual((detectionOverlay.match(/class="bbox-label/g) || []).length, foods.length);
+assert.strictEqual((detectionOverlay.match(/data-food-id=/g) || []).length, foods.length * 2);
 assert(detectionOverlay.includes("牛肉 3天后"));
 assert(detectionOverlay.includes("鸡蛋 新鲜"));
-assert(detectionOverlay.includes("牛奶 今天到期"));
-assert(detectionOverlay.includes("鸡胸肉 已过期"));
-assert(detectionOverlay.includes("--box-left:"));
+assert(detectionOverlay.includes("牛奶 到期"));
+assert(detectionOverlay.includes("鸡胸肉 过期"));
+assert(detectionOverlay.includes("--hero-left:"));
+assert(!detectionOverlay.includes("..."), "Hero labels should never contain ellipsis text");
 assert(!detectionOverlay.includes("http://") && !detectionOverlay.includes("https://"), "Detection overlay should not render remote images");
+
+const heroFoodIds = [...detectionOverlay.matchAll(/data-food-id="([^"]+)"/g)].map((match) => match[1]);
+assert.deepStrictEqual(
+  [...new Set(heroFoodIds)].sort(),
+  foods.map((food) => food.id).sort(),
+  "Hero foods should come from the same foods dataset as inventory"
+);
+
+const inventoryMarkup = renderPageContent("inventory", {
+  foods,
+  scanned: true,
+  activeCategory: CATEGORIES.ALL,
+});
+const inventoryFoodIds = [...inventoryMarkup.matchAll(/data-food-id="([^"]+)"/g)]
+  .map((match) => match[1])
+  .filter((id, index, ids) => ids.indexOf(id) === index);
+assert.deepStrictEqual(
+  inventoryFoodIds.sort(),
+  foods.map((food) => food.id).sort(),
+  "Inventory items should come from the same foods dataset as hero foods"
+);
 
 const groups = getReminderGroups(foods);
 assert(groups.today.some((food) => food.id === "milk"));

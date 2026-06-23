@@ -173,6 +173,7 @@ p {
   position: relative;
   overflow: hidden;
   height: clamp(260px, 48vw, 340px);
+  background: #E8EEEC;
 }
 
 .scan-hero-media::after {
@@ -185,44 +186,119 @@ p {
   height: 100%;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.46), rgba(0, 0, 0, 0.1) 52%, rgba(0, 0, 0, 0.42));
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.56), rgba(255, 255, 255, 0) 32%),
+    linear-gradient(180deg, rgba(26, 29, 26, 0.12), rgba(255, 255, 255, 0) 28%, rgba(26, 29, 26, 0.12));
 }
 
-.scan-hero-media > img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.detection-layer {
+.fridge-stage-bg {
   position: absolute;
-  z-index: 2;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 7%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 32%),
+    linear-gradient(90deg, rgba(26, 29, 26, 0.16), rgba(255, 255, 255, 0.3) 14%, rgba(255, 255, 255, 0.26) 86%, rgba(26, 29, 26, 0.16)),
+    linear-gradient(180deg, #F7FAF8 0%, #E9F0EF 46%, #DDE7E4 100%);
+  box-shadow:
+    inset 0 18px 42px rgba(255, 255, 255, 0.8),
+    inset 0 -32px 50px rgba(26, 29, 26, 0.13),
+    inset 18px 0 28px rgba(26, 29, 26, 0.11),
+    inset -18px 0 28px rgba(26, 29, 26, 0.11);
+}
+
+.fridge-wall,
+.fridge-shelf {
+  position: absolute;
+  pointer-events: none;
+}
+
+.fridge-wall {
+  top: 0;
+  bottom: 0;
+  width: 34px;
+  background: linear-gradient(90deg, rgba(26, 29, 26, 0.13), rgba(255, 255, 255, 0.22));
+}
+
+.fridge-wall-left {
+  left: 0;
+}
+
+.fridge-wall-right {
+  right: 0;
+  transform: rotate(180deg);
+}
+
+.fridge-shelf {
+  left: 8%;
+  right: 8%;
+  height: 7px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow:
+    0 1px 0 rgba(26, 29, 26, 0.08),
+    0 9px 16px rgba(26, 29, 26, 0.13),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.fridge-shelf-one {
+  top: 45%;
+}
+
+.fridge-shelf-two {
+  top: 72%;
+}
+
+.hero-scene-layer,
+.detection-layer,
+.sheet-detection-root {
+  position: absolute;
   inset: 0;
   pointer-events: none;
+}
+
+.hero-scene-layer {
+  z-index: 2;
+}
+
+.detection-layer,
+.sheet-detection-root {
+  z-index: 3;
 }
 
 .detection-layer.is-calibrating {
   pointer-events: auto;
 }
 
-.detection-box {
+.hero-food-scene-item {
   position: absolute;
-  left: var(--box-left);
-  top: var(--box-top);
-  width: var(--box-width);
-  height: var(--box-height);
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--detect-bg) 16%, transparent);
-  box-shadow:
-    inset 0 0 0 1.5px var(--detect-color),
-    0 2px 7px rgba(0, 0, 0, 0.1);
+  left: var(--hero-left);
+  top: var(--hero-top);
+  width: var(--hero-width);
+  height: var(--hero-height);
+  pointer-events: none;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  overflow: visible;
 }
 
-.detection-box.is-highlighted {
+.hero-detection-box {
+  position: absolute;
+  z-index: 3;
+  left: var(--hero-left);
+  top: var(--hero-top);
+  width: var(--hero-width);
+  height: var(--hero-height);
+  box-sizing: border-box;
+  overflow: visible;
+  border: 1.5px solid var(--detect-color);
+  border-radius: 6px;
+  background: transparent;
+}
+
+.hero-detection-box.is-highlighted {
   box-shadow:
-    inset 0 0 0 2px var(--detect-color),
-    0 4px 12px rgba(0, 0, 0, 0.2);
+    0 0 0 1px var(--detect-color),
+    0 5px 14px rgba(26, 29, 26, 0.18);
 }
 
 .detection-fresh {
@@ -240,24 +316,36 @@ p {
   --detect-bg: var(--expire-bg);
 }
 
-.detection-label {
+.hero-food-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 3px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.22));
+  mix-blend-mode: multiply;
+  object-fit: contain;
+}
+
+.bbox-label {
   position: absolute;
-  top: 0;
-  left: 0;
-  max-width: 120%;
-  overflow: hidden;
-  padding: 2px 6px;
-  border-radius: 6px;
+  z-index: 3;
+  top: -15px;
+  left: -2px;
+  max-width: calc(100% + 72px);
+  padding: 3px 7px;
+  border-radius: var(--r-pill);
   background: var(--detect-color);
   color: var(--bg-card);
   font-size: 10px;
   font-weight: 600;
-  line-height: 1.4;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.2;
+  white-space: normal;
 }
 
-.detection-resize-handle {
+.hero-resize-handle {
   position: absolute;
   right: -4px;
   bottom: -4px;
@@ -806,14 +894,15 @@ p {
   position: relative;
   overflow: hidden;
   border-radius: var(--r-card);
+  height: 220px;
   box-shadow: var(--shadow-card);
+  background: #EEF3F1;
 }
 
-.scan-preview img {
-  display: block;
-  width: 100%;
+.scan-preview .fridge-stage-bg {
+  position: absolute;
+  inset: 0;
   height: 220px;
-  object-fit: cover;
 }
 
 .scan-frame {

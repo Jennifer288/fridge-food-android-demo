@@ -80,8 +80,13 @@
             </button>
           </div>
           <div class="scan-preview">
-            <img src="assets/fridge-hero.png" alt="冰箱内新鲜食材照片" />
-            <div class="detection-layer" id="sheetDetectionLayer" aria-hidden="true"></div>
+            <div class="fridge-stage-bg" aria-hidden="true">
+              <span class="fridge-wall fridge-wall-left"></span>
+              <span class="fridge-wall fridge-wall-right"></span>
+              <span class="fridge-shelf fridge-shelf-one"></span>
+              <span class="fridge-shelf fridge-shelf-two"></span>
+            </div>
+            <div class="sheet-detection-root" id="sheetDetectionLayer" aria-hidden="true"></div>
             <span class="scan-frame" aria-hidden="true"></span>
           </div>
           <p id="scanProgress" class="scan-progress">准备识别冰箱照片</p>

@@ -89,7 +89,7 @@ const FOODS = [
     purchaseDay: -2,
     daysLeft: 3,
     image: "assets/foods/beef.jpg",
-    box: { x: 0.62, y: 0.63, w: 0.24, h: 0.12 },
+    hero: { x: 0.08, y: 0.50, w: 0.22, h: 0.17 },
     storageTip: "密封冷藏，建议分装后靠内侧存放。",
     action: "3 天内适合煎炒或炖煮。",
   },
@@ -103,7 +103,7 @@ const FOODS = [
     purchaseDay: -4,
     daysLeft: 6,
     image: "assets/foods/eggs.jpg",
-    box: { x: 0.76, y: 0.34, w: 0.16, h: 0.12 },
+    hero: { x: 0.24, y: 0.18, w: 0.16, h: 0.18 },
     storageTip: "保留原包装，避免靠近冰箱门反复升温。",
     action: "状态新鲜，适合早餐或烘焙。",
   },
@@ -117,7 +117,7 @@ const FOODS = [
     purchaseDay: -5,
     daysLeft: 0,
     image: "assets/foods/milk.jpg",
-    box: { x: 0.68, y: 0.08, w: 0.10, h: 0.38 },
+    hero: { x: 0.07, y: 0.15, w: 0.13, h: 0.29 },
     storageTip: "开封后尽量放在冷藏室深处。",
     action: "今天喝完，适合搭配早餐。",
   },
@@ -131,7 +131,7 @@ const FOODS = [
     purchaseDay: -4,
     daysLeft: 1,
     image: "assets/foods/tomato.jpg",
-    box: { x: 0.27, y: 0.61, w: 0.22, h: 0.15 },
+    hero: { x: 0.56, y: 0.75, w: 0.25, h: 0.17 },
     storageTip: "保持干燥，避免与叶菜挤压。",
     action: "明天前做沙拉或炒蛋。",
   },
@@ -145,7 +145,7 @@ const FOODS = [
     purchaseDay: -4,
     daysLeft: 2,
     image: "assets/foods/lettuce.jpg",
-    box: { x: 0.20, y: 0.16, w: 0.18, h: 0.30 },
+    hero: { x: 0.10, y: 0.75, w: 0.25, h: 0.17 },
     storageTip: "用厨房纸吸水后装袋冷藏。",
     action: "2 天内处理，变软叶片先挑出。",
   },
@@ -159,7 +159,7 @@ const FOODS = [
     purchaseDay: -10,
     daysLeft: 0,
     image: "assets/foods/yogurt.jpg",
-    box: { x: 0.50, y: 0.49, w: 0.11, h: 0.27 },
+    hero: { x: 0.46, y: 0.17, w: 0.14, h: 0.21 },
     storageTip: "今天到期，开封后不要继续久放。",
     action: "今天吃完，适合搭配蓝莓。",
   },
@@ -173,7 +173,7 @@ const FOODS = [
     purchaseDay: -12,
     daysLeft: -1,
     image: "assets/foods/chicken.jpg",
-    box: { x: 0.64, y: 0.66, w: 0.13, h: 0.09 },
+    hero: { x: 0.38, y: 0.50, w: 0.20, h: 0.17 },
     storageTip: "已过期，不建议继续食用。",
     action: "移出冰箱并丢弃。",
   },
@@ -187,7 +187,7 @@ const FOODS = [
     purchaseDay: -2,
     daysLeft: 5,
     image: "assets/foods/blueberry.jpg",
-    box: { x: 0.37, y: 0.36, w: 0.17, h: 0.11 },
+    hero: { x: 0.72, y: 0.49, w: 0.18, h: 0.18 },
     storageTip: "食用前再清洗，避免受潮发霉。",
     action: "状态新鲜，适合做酸奶杯。",
   },
@@ -201,7 +201,7 @@ const FOODS = [
     purchaseDay: -4,
     daysLeft: 2,
     image: "assets/foods/orange-juice.jpg",
-    box: { x: 0.93, y: 0.49, w: 0.06, h: 0.39 },
+    hero: { x: 0.76, y: 0.15, w: 0.15, h: 0.30 },
     storageTip: "开封后冷藏，饮用前轻摇。",
     action: "2 天内喝完，适合搭配早餐或酸奶饮。",
   },
@@ -338,6 +338,22 @@ function getFreshnessPill(food) {
   return { tone: "fresh", label: "新鲜" };
 }
 
+function getHeroStatusLabel(food) {
+  if (food.remainingDays < 0) {
+    return "过期";
+  }
+
+  if (food.remainingDays === 0) {
+    return "到期";
+  }
+
+  if (food.remainingDays <= 3) {
+    return `${food.remainingDays}天后`;
+  }
+
+  return "新鲜";
+}
+
 function getReminderText(reminder) {
   const text = {
     expired: "已过期",
@@ -407,25 +423,48 @@ function renderFoodCard(food) {
   `;
 }
 
+function getHeroStyle(food) {
+  const hero = food.hero;
+  return `--hero-left:${hero.x * 100}%;--hero-top:${hero.y * 100}%;--hero-width:${hero.w * 100}%;--hero-height:${hero.h * 100}%;`;
+}
+
+function renderHeroSceneItems(foods) {
+  return foods.map((food) => {
+    const name = escapeHtml(food.name);
+    const image = escapeHtml(food.image);
+
+    return `
+      <div
+        class="hero-food-scene-item"
+        data-food-id="${escapeHtml(food.id)}"
+        style="${getHeroStyle(food)}"
+      >
+        <img class="hero-food-img" src="${image}" alt="${name}" loading="lazy" />
+      </div>
+    `;
+  }).join("");
+}
+
 function renderDetectionBoxes(foods, highlightedFoodId = "") {
   return foods.map((food) => {
     const pill = getFreshnessPill(food);
     const highlight = highlightedFoodId === food.id ? " is-highlighted" : "";
-    const box = food.box;
+    const name = escapeHtml(food.name);
+    const label = `${name} ${getHeroStatusLabel(food)}`;
 
     return `
       <div
-        class="detection-box detection-${pill.tone}${highlight}"
-        data-detection-food-id="${escapeHtml(food.id)}"
-        data-box-x="${box.x}"
-        data-box-y="${box.y}"
-        data-box-w="${box.w}"
-        data-box-h="${box.h}"
-        style="--box-left:${box.x * 100}%;--box-top:${box.y * 100}%;--box-width:${box.w * 100}%;--box-height:${box.h * 100}%;"
-        aria-label="${escapeHtml(food.name)} ${pill.label}"
+        class="hero-detection-box detection-${pill.tone}${highlight}"
+        data-food-id="${escapeHtml(food.id)}"
+        data-hero-x="${food.hero.x}"
+        data-hero-y="${food.hero.y}"
+        data-hero-w="${food.hero.w}"
+        data-hero-h="${food.hero.h}"
+        style="${getHeroStyle(food)}"
+        aria-label="${label}"
       >
-        <span class="detection-label">${escapeHtml(food.name)} ${pill.label}</span>
-        ${CALIBRATE ? '<span class="detection-resize-handle" aria-hidden="true"></span>' : ""}
+        <span class="bbox-label">${label}</span>
+        ${CALIBRATE ? '<span class="hero-resize-handle" aria-hidden="true"></span>' : ""}
       </div>
     `;
   }).join("");
@@ -437,6 +476,9 @@ function renderDetectionOverlay(foods, highlightedFoodId = "") {
   }
 
   return `
+    <div class="hero-scene-layer" aria-hidden="true">
+      ${renderHeroSceneItems(foods)}
+    </div>
     <div class="detection-layer${CALIBRATE ? " is-calibrating" : ""}" aria-hidden="true">
       ${renderDetectionBoxes(foods, highlightedFoodId)}
     </div>
@@ -451,7 +493,12 @@ function renderScanCard(state) {
   return `
     <section class="scan-card" aria-label="冰箱识别摘要">
       <div class="scan-hero-media">
-        <img src="assets/fridge-hero.png" alt="冰箱内新鲜食材照片" />
+        <div class="fridge-stage-bg" aria-hidden="true">
+          <span class="fridge-wall fridge-wall-left"></span>
+          <span class="fridge-wall fridge-wall-right"></span>
+          <span class="fridge-shelf fridge-shelf-one"></span>
+          <span class="fridge-shelf fridge-shelf-two"></span>
+        </div>
         ${state.scanned ? renderDetectionOverlay(foods, state.highlightedFoodId) : ""}
         <div class="scan-overlay">
           <span>${scanStatus}</span>
@@ -733,7 +780,7 @@ if (typeof document !== "undefined") {
     }
     sheetDetectionLayer.classList.toggle("is-calibrating", CALIBRATE);
     sheetDetectionLayer.innerHTML = appState.scanned
-      ? renderDetectionBoxes(appState.foods, appState.highlightedFoodId)
+      ? renderDetectionOverlay(appState.foods, appState.highlightedFoodId)
       : "";
   }
 
@@ -865,22 +912,22 @@ if (typeof document !== "undefined") {
 
   function readBoxFromElement(boxElement) {
     return {
-      x: Number(boxElement.dataset.boxX),
-      y: Number(boxElement.dataset.boxY),
-      w: Number(boxElement.dataset.boxW),
-      h: Number(boxElement.dataset.boxH),
+      x: Number(boxElement.dataset.heroX),
+      y: Number(boxElement.dataset.heroY),
+      w: Number(boxElement.dataset.heroW),
+      h: Number(boxElement.dataset.heroH),
     };
   }
 
   function applyBoxToElement(boxElement, box) {
-    boxElement.dataset.boxX = String(box.x);
-    boxElement.dataset.boxY = String(box.y);
-    boxElement.dataset.boxW = String(box.w);
-    boxElement.dataset.boxH = String(box.h);
-    boxElement.style.setProperty("--box-left", `${box.x * 100}%`);
-    boxElement.style.setProperty("--box-top", `${box.y * 100}%`);
-    boxElement.style.setProperty("--box-width", `${box.w * 100}%`);
-    boxElement.style.setProperty("--box-height", `${box.h * 100}%`);
+    boxElement.dataset.heroX = String(box.x);
+    boxElement.dataset.heroY = String(box.y);
+    boxElement.dataset.heroW = String(box.w);
+    boxElement.dataset.heroH = String(box.h);
+    boxElement.style.setProperty("--hero-left", `${box.x * 100}%`);
+    boxElement.style.setProperty("--hero-top", `${box.y * 100}%`);
+    boxElement.style.setProperty("--hero-width", `${box.w * 100}%`);
+    boxElement.style.setProperty("--hero-height", `${box.h * 100}%`);
   }
 
   function logCalibrationBox(foodId, box) {
@@ -898,7 +945,7 @@ if (typeof document !== "undefined") {
       return;
     }
 
-    const boxElement = event.target.closest(".detection-box");
+    const boxElement = event.target.closest(".hero-detection-box");
     const layer = boxElement && boxElement.closest(".detection-layer");
     if (!boxElement || !layer) {
       return;
@@ -906,12 +953,12 @@ if (typeof document !== "undefined") {
 
     event.preventDefault();
 
-    const foodId = boxElement.dataset.detectionFoodId;
+    const foodId = boxElement.dataset.foodId;
     const startBox = readBoxFromElement(boxElement);
     const layerRect = layer.getBoundingClientRect();
     const startX = event.clientX;
     const startY = event.clientY;
-    const isResize = Boolean(event.target.closest(".detection-resize-handle"));
+    const isResize = Boolean(event.target.closest(".hero-resize-handle"));
     let latestBox = { ...startBox };
 
     function move(pointerEvent) {
