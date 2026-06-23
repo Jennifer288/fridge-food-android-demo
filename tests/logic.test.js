@@ -112,6 +112,11 @@ assert.strictEqual(drink.name, "橙汁");
 assert.strictEqual(drink.remainingDays, 2);
 assert.strictEqual(getFreshnessPill(drink).label, "2天后");
 
+const eggs = foods.find((food) => food.id === "eggs");
+assert(eggs, "Eggs should exist in the demo dataset");
+assert.strictEqual(eggs.image, "assets/foods/eggs.jpg", "Eggs should point at the real eggs photo");
+assert(fs.existsSync(path.resolve(__dirname, "..", eggs.image)), "Eggs photo should exist so the fallback initial is not used");
+
 for (const food of foods) {
   assert(food.image, `${food.name} is missing an image path`);
   assert(/^assets\/foods\/.+\.(jpg|jpeg|png|webp)$/i.test(food.image), `${food.name} image must be a local food asset`);
@@ -164,10 +169,10 @@ assert(chickenHero.w >= 0.10 && chickenHero.w <= 0.15, "Chicken box should be me
 assert(chickenHero.h >= 0.12 && chickenHero.h <= 0.18, "Chicken box should be medium height");
 assert(horizontalOverlap(beefHero, chickenHero) <= 0.04, "Beef and chicken boxes should not overlap heavily");
 
-assert(orangeHero.x >= 0.87 && orangeHero.x <= 0.90, "Orange juice box should move inward from the right edge");
-assert(orangeHero.y >= 0.50 && orangeHero.y <= 0.58, "Orange juice box should start around the right door bottle body");
-assert(orangeHero.w >= 0.07 && orangeHero.w <= 0.09, "Orange juice box should stay narrow around the bottle");
-assert(orangeHero.h >= 0.34 && orangeHero.h <= 0.40, "Orange juice box should stay tall around the bottle");
+assert(orangeHero.x >= 0.82 && orangeHero.x <= 0.87, "Orange juice box should move into the fridge interior");
+assert(orangeHero.y >= 0.52 && orangeHero.y <= 0.57, "Orange juice box should start around an interior shelf bottle");
+assert(orangeHero.w >= 0.05 && orangeHero.w <= 0.08, "Orange juice box should stay narrow around the bottle");
+assert(orangeHero.h >= 0.26 && orangeHero.h <= 0.34, "Orange juice box should stay tall around the bottle");
 
 const beefCard = renderFoodCard(foods[0]);
 assert(beefCard.includes("<img"), "Food card should render an image thumbnail");
