@@ -1,4 +1,5 @@
 const DEMO_TODAY = 0;
+const CALIBRATE = false;
 
 const CATEGORIES = {
   ALL: "all",
@@ -77,7 +78,140 @@ const RECIPE_DEFINITIONS = [
   },
 ];
 
+const FOODS = [
+  {
+    id: "beef",
+    name: "牛肉",
+    category: CATEGORIES.MEAT_EGG_DAIRY,
+    categoryLabel: "肉蛋奶",
+    location: "冷藏室",
+    freshness: 86,
+    purchaseDay: -2,
+    daysLeft: 3,
+    image: "assets/foods/beef.jpg",
+    box: { x: 0.62, y: 0.63, w: 0.24, h: 0.12 },
+    storageTip: "密封冷藏，建议分装后靠内侧存放。",
+    action: "3 天内适合煎炒或炖煮。",
+  },
+  {
+    id: "eggs",
+    name: "鸡蛋",
+    category: CATEGORIES.MEAT_EGG_DAIRY,
+    categoryLabel: "肉蛋奶",
+    location: "冷藏室",
+    freshness: 88,
+    purchaseDay: -4,
+    daysLeft: 6,
+    image: "assets/foods/eggs.jpg",
+    box: { x: 0.76, y: 0.34, w: 0.16, h: 0.12 },
+    storageTip: "保留原包装，避免靠近冰箱门反复升温。",
+    action: "状态新鲜，适合早餐或烘焙。",
+  },
+  {
+    id: "milk",
+    name: "牛奶",
+    category: CATEGORIES.MEAT_EGG_DAIRY,
+    categoryLabel: "肉蛋奶",
+    location: "门架",
+    freshness: 52,
+    purchaseDay: -5,
+    daysLeft: 0,
+    image: "assets/foods/milk.jpg",
+    box: { x: 0.68, y: 0.08, w: 0.10, h: 0.38 },
+    storageTip: "开封后尽量放在冷藏室深处。",
+    action: "今天喝完，适合搭配早餐。",
+  },
+  {
+    id: "tomato",
+    name: "番茄",
+    category: CATEGORIES.FRUIT_VEG,
+    categoryLabel: "蔬果",
+    location: "冷藏室",
+    freshness: 72,
+    purchaseDay: -4,
+    daysLeft: 1,
+    image: "assets/foods/tomato.jpg",
+    box: { x: 0.27, y: 0.61, w: 0.22, h: 0.15 },
+    storageTip: "保持干燥，避免与叶菜挤压。",
+    action: "明天前做沙拉或炒蛋。",
+  },
+  {
+    id: "lettuce",
+    name: "生菜",
+    category: CATEGORIES.FRUIT_VEG,
+    categoryLabel: "蔬果",
+    location: "保鲜抽屉",
+    freshness: 39,
+    purchaseDay: -4,
+    daysLeft: 2,
+    image: "assets/foods/lettuce.jpg",
+    box: { x: 0.20, y: 0.16, w: 0.18, h: 0.30 },
+    storageTip: "用厨房纸吸水后装袋冷藏。",
+    action: "2 天内处理，变软叶片先挑出。",
+  },
+  {
+    id: "yogurt",
+    name: "酸奶",
+    category: CATEGORIES.MEAT_EGG_DAIRY,
+    categoryLabel: "肉蛋奶",
+    location: "冷藏室",
+    freshness: 45,
+    purchaseDay: -10,
+    daysLeft: 0,
+    image: "assets/foods/yogurt.jpg",
+    box: { x: 0.50, y: 0.49, w: 0.11, h: 0.27 },
+    storageTip: "今天到期，开封后不要继续久放。",
+    action: "今天吃完，适合搭配蓝莓。",
+  },
+  {
+    id: "chicken",
+    name: "鸡胸肉",
+    category: CATEGORIES.MEAT_EGG_DAIRY,
+    categoryLabel: "肉蛋奶",
+    location: "冷冻室",
+    freshness: 32,
+    purchaseDay: -12,
+    daysLeft: -1,
+    image: "assets/foods/chicken.jpg",
+    box: { x: 0.64, y: 0.66, w: 0.13, h: 0.09 },
+    storageTip: "已过期，不建议继续食用。",
+    action: "移出冰箱并丢弃。",
+  },
+  {
+    id: "blueberry",
+    name: "蓝莓",
+    category: CATEGORIES.FRUIT_VEG,
+    categoryLabel: "蔬果",
+    location: "保鲜抽屉",
+    freshness: 84,
+    purchaseDay: -2,
+    daysLeft: 5,
+    image: "assets/foods/blueberry.jpg",
+    box: { x: 0.37, y: 0.36, w: 0.17, h: 0.11 },
+    storageTip: "食用前再清洗，避免受潮发霉。",
+    action: "状态新鲜，适合做酸奶杯。",
+  },
+  {
+    id: "orangeJuice",
+    name: "橙汁",
+    category: CATEGORIES.DRINK,
+    categoryLabel: "饮品",
+    location: "门架",
+    freshness: 64,
+    purchaseDay: -4,
+    daysLeft: 2,
+    image: "assets/foods/orange-juice.jpg",
+    box: { x: 0.93, y: 0.49, w: 0.06, h: 0.39 },
+    storageTip: "开封后冷藏，饮用前轻摇。",
+    action: "2 天内喝完，适合搭配早餐或酸奶饮。",
+  },
+];
+
 function calculateRemainingDays(food, today = DEMO_TODAY) {
+  if (typeof food.daysLeft === "number") {
+    return food.daysLeft;
+  }
+
   return food.expiryDay - today;
 }
 
@@ -121,6 +255,7 @@ function hydrateFood(food, today = DEMO_TODAY) {
   const remainingDays = calculateRemainingDays(food, today);
   const hydrated = {
     ...food,
+    zone: food.location || food.zone,
     remainingDays,
   };
 
@@ -132,145 +267,7 @@ function hydrateFood(food, today = DEMO_TODAY) {
 }
 
 function createRecognizedFoods(today = DEMO_TODAY) {
-  const foods = [
-    {
-      id: "beef",
-      name: "牛肉",
-      category: CATEGORIES.MEAT_EGG_DAIRY,
-      categoryLabel: "肉蛋奶",
-      zone: "冷藏室",
-      freshness: 86,
-      purchaseDay: -2,
-      expiryDay: 3,
-      image: "assets/foods/beef.jpg",
-      bbox: { left: 10, top: 54, width: 25, height: 18 },
-      storageTip: "密封冷藏，建议分装后靠内侧存放。",
-      action: "3 天内适合煎炒或炖煮。",
-      accent: "red",
-    },
-    {
-      id: "eggs",
-      name: "鸡蛋",
-      category: CATEGORIES.MEAT_EGG_DAIRY,
-      categoryLabel: "肉蛋奶",
-      zone: "冷藏室",
-      freshness: 88,
-      purchaseDay: -4,
-      expiryDay: 6,
-      image: "assets/foods/eggs.jpg",
-      bbox: { left: 34, top: 18, width: 22, height: 15 },
-      storageTip: "保留原包装，避免靠近冰箱门反复升温。",
-      action: "状态新鲜，适合早餐或烘焙。",
-      accent: "amber",
-    },
-    {
-      id: "milk",
-      name: "牛奶",
-      category: CATEGORIES.MEAT_EGG_DAIRY,
-      categoryLabel: "肉蛋奶",
-      zone: "门架",
-      freshness: 52,
-      purchaseDay: -5,
-      expiryDay: 0,
-      image: "assets/foods/milk.jpg",
-      bbox: { left: 6, top: 20, width: 17, height: 28 },
-      storageTip: "开封后尽量放在冷藏室深处。",
-      action: "今天喝完，适合搭配早餐。",
-      accent: "blue",
-    },
-    {
-      id: "tomato",
-      name: "番茄",
-      category: CATEGORIES.FRUIT_VEG,
-      categoryLabel: "蔬果",
-      zone: "冷藏室",
-      freshness: 72,
-      purchaseDay: -4,
-      expiryDay: 1,
-      image: "assets/foods/tomato.jpg",
-      bbox: { left: 30, top: 62, width: 22, height: 15 },
-      storageTip: "保持干燥，避免与叶菜挤压。",
-      action: "明天前做沙拉或炒蛋。",
-      accent: "red",
-    },
-    {
-      id: "lettuce",
-      name: "生菜",
-      category: CATEGORIES.FRUIT_VEG,
-      categoryLabel: "蔬果",
-      zone: "保鲜抽屉",
-      freshness: 39,
-      purchaseDay: -4,
-      expiryDay: 2,
-      image: "assets/foods/lettuce.jpg",
-      bbox: { left: 12, top: 42, width: 25, height: 15 },
-      storageTip: "用厨房纸吸水后装袋冷藏。",
-      action: "2 天内处理，变软叶片先挑出。",
-      accent: "green",
-    },
-    {
-      id: "yogurt",
-      name: "酸奶",
-      category: CATEGORIES.MEAT_EGG_DAIRY,
-      categoryLabel: "肉蛋奶",
-      zone: "冷藏室",
-      freshness: 45,
-      purchaseDay: -10,
-      expiryDay: 0,
-      image: "assets/foods/yogurt.jpg",
-      bbox: { left: 57, top: 22, width: 24, height: 16 },
-      storageTip: "今天到期，开封后不要继续久放。",
-      action: "今天吃完，适合搭配蓝莓。",
-      accent: "purple",
-    },
-    {
-      id: "chicken",
-      name: "鸡胸肉",
-      category: CATEGORIES.MEAT_EGG_DAIRY,
-      categoryLabel: "肉蛋奶",
-      zone: "冷冻室",
-      freshness: 32,
-      purchaseDay: -12,
-      expiryDay: -1,
-      image: "assets/foods/chicken.jpg",
-      bbox: { left: 42, top: 76, width: 28, height: 16 },
-      storageTip: "已过期，不建议继续食用。",
-      action: "移出冰箱并丢弃。",
-      accent: "red",
-    },
-    {
-      id: "blueberry",
-      name: "蓝莓",
-      category: CATEGORIES.FRUIT_VEG,
-      categoryLabel: "蔬果",
-      zone: "保鲜抽屉",
-      freshness: 84,
-      purchaseDay: -2,
-      expiryDay: 5,
-      image: "assets/foods/blueberry.jpg",
-      bbox: { left: 70, top: 44, width: 20, height: 18 },
-      storageTip: "食用前再清洗，避免受潮发霉。",
-      action: "状态新鲜，适合做酸奶杯。",
-      accent: "blue",
-    },
-    {
-      id: "orangeJuice",
-      name: "橙汁",
-      category: CATEGORIES.DRINK,
-      categoryLabel: "饮品",
-      zone: "门架",
-      freshness: 64,
-      purchaseDay: -4,
-      expiryDay: 2,
-      image: "assets/foods/orange-juice.jpg",
-      bbox: { left: 76, top: 20, width: 17, height: 25 },
-      storageTip: "开封后冷藏，饮用前轻摇。",
-      action: "2 天内喝完，适合搭配早餐或酸奶饮。",
-      accent: "orange",
-    },
-  ];
-
-  return foods.map((food) => hydrateFood(food, today));
+  return FOODS.map((food) => hydrateFood(food, today));
 }
 
 function filterFoodsByCategory(foods, category) {
@@ -414,14 +411,21 @@ function renderDetectionBoxes(foods, highlightedFoodId = "") {
   return foods.map((food) => {
     const pill = getFreshnessPill(food);
     const highlight = highlightedFoodId === food.id ? " is-highlighted" : "";
+    const box = food.box;
 
     return `
       <div
         class="detection-box detection-${pill.tone}${highlight}"
-        style="--box-left:${food.bbox.left}%;--box-top:${food.bbox.top}%;--box-width:${food.bbox.width}%;--box-height:${food.bbox.height}%;"
+        data-detection-food-id="${escapeHtml(food.id)}"
+        data-box-x="${box.x}"
+        data-box-y="${box.y}"
+        data-box-w="${box.w}"
+        data-box-h="${box.h}"
+        style="--box-left:${box.x * 100}%;--box-top:${box.y * 100}%;--box-width:${box.w * 100}%;--box-height:${box.h * 100}%;"
         aria-label="${escapeHtml(food.name)} ${pill.label}"
       >
         <span class="detection-label">${escapeHtml(food.name)} ${pill.label}</span>
+        ${CALIBRATE ? '<span class="detection-resize-handle" aria-hidden="true"></span>' : ""}
       </div>
     `;
   }).join("");
@@ -433,7 +437,7 @@ function renderDetectionOverlay(foods, highlightedFoodId = "") {
   }
 
   return `
-    <div class="detection-layer" aria-hidden="true">
+    <div class="detection-layer${CALIBRATE ? " is-calibrating" : ""}" aria-hidden="true">
       ${renderDetectionBoxes(foods, highlightedFoodId)}
     </div>
   `;
@@ -727,6 +731,7 @@ if (typeof document !== "undefined") {
     if (!sheetDetectionLayer) {
       return;
     }
+    sheetDetectionLayer.classList.toggle("is-calibrating", CALIBRATE);
     sheetDetectionLayer.innerHTML = appState.scanned
       ? renderDetectionBoxes(appState.foods, appState.highlightedFoodId)
       : "";
@@ -854,12 +859,102 @@ if (typeof document !== "undefined") {
     renderApp();
   }
 
+  function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+  }
+
+  function readBoxFromElement(boxElement) {
+    return {
+      x: Number(boxElement.dataset.boxX),
+      y: Number(boxElement.dataset.boxY),
+      w: Number(boxElement.dataset.boxW),
+      h: Number(boxElement.dataset.boxH),
+    };
+  }
+
+  function applyBoxToElement(boxElement, box) {
+    boxElement.dataset.boxX = String(box.x);
+    boxElement.dataset.boxY = String(box.y);
+    boxElement.dataset.boxW = String(box.w);
+    boxElement.dataset.boxH = String(box.h);
+    boxElement.style.setProperty("--box-left", `${box.x * 100}%`);
+    boxElement.style.setProperty("--box-top", `${box.y * 100}%`);
+    boxElement.style.setProperty("--box-width", `${box.w * 100}%`);
+    boxElement.style.setProperty("--box-height", `${box.h * 100}%`);
+  }
+
+  function logCalibrationBox(foodId, box) {
+    const rounded = {
+      x: Number(box.x.toFixed(3)),
+      y: Number(box.y.toFixed(3)),
+      w: Number(box.w.toFixed(3)),
+      h: Number(box.h.toFixed(3)),
+    };
+    console.log(`${foodId}: { x: ${rounded.x}, y: ${rounded.y}, w: ${rounded.w}, h: ${rounded.h} }`);
+  }
+
+  function handleCalibrationPointerDown(event) {
+    if (!CALIBRATE) {
+      return;
+    }
+
+    const boxElement = event.target.closest(".detection-box");
+    const layer = boxElement && boxElement.closest(".detection-layer");
+    if (!boxElement || !layer) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const foodId = boxElement.dataset.detectionFoodId;
+    const startBox = readBoxFromElement(boxElement);
+    const layerRect = layer.getBoundingClientRect();
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const isResize = Boolean(event.target.closest(".detection-resize-handle"));
+    let latestBox = { ...startBox };
+
+    function move(pointerEvent) {
+      const deltaX = (pointerEvent.clientX - startX) / layerRect.width;
+      const deltaY = (pointerEvent.clientY - startY) / layerRect.height;
+
+      if (isResize) {
+        latestBox = {
+          ...startBox,
+          w: clamp(startBox.w + deltaX, 0.04, 1 - startBox.x),
+          h: clamp(startBox.h + deltaY, 0.04, 1 - startBox.y),
+        };
+      } else {
+        latestBox = {
+          ...startBox,
+          x: clamp(startBox.x + deltaX, 0, 1 - startBox.w),
+          y: clamp(startBox.y + deltaY, 0, 1 - startBox.h),
+        };
+      }
+
+      applyBoxToElement(boxElement, latestBox);
+    }
+
+    function up() {
+      document.removeEventListener("pointermove", move);
+      document.removeEventListener("pointerup", up);
+      document.removeEventListener("pointercancel", up);
+      logCalibrationBox(foodId, latestBox);
+    }
+
+    document.addEventListener("pointermove", move);
+    document.addEventListener("pointerup", up);
+    document.addEventListener("pointercancel", up);
+  }
+
   function initApp() {
     getElement("pageContent").addEventListener("click", handlePageClick);
     getElement("bottomNav").addEventListener("click", handleNavClick);
     getElement("closeScan").addEventListener("click", closeScanSheet);
     getElement("startScan").addEventListener("click", startScanSimulation);
     getElement("closeDetail").addEventListener("click", closeDetail);
+
+    document.addEventListener("pointerdown", handleCalibrationPointerDown);
 
     getElement("pageContent").addEventListener("keydown", (event) => {
       if (event.key !== "Enter" && event.key !== " ") {
@@ -880,8 +975,10 @@ if (typeof document !== "undefined") {
 if (typeof module !== "undefined") {
   module.exports = {
     CATEGORIES,
+    CALIBRATE,
     CATEGORY_LABELS,
     DEMO_TODAY,
+    FOODS,
     NAV_ITEMS,
     createRecognizedFoods,
     calculateRemainingDays,

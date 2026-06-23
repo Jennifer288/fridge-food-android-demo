@@ -3,7 +3,9 @@ const fs = require("fs");
 const path = require("path");
 const {
   CATEGORIES,
+  CALIBRATE,
   DEMO_TODAY,
+  FOODS,
   NAV_ITEMS,
   createRecognizedFoods,
   calculateRemainingDays,
@@ -22,8 +24,18 @@ const {
 
 const foods = createRecognizedFoods();
 const html = fs.readFileSync(path.resolve(__dirname, "..", "index.html"), "utf8");
+const script = fs.readFileSync(path.resolve(__dirname, "..", "script.js"), "utf8");
 
 assert.strictEqual(DEMO_TODAY, 0);
+assert.strictEqual(CALIBRATE, false, "CALIBRATE should default to false in published builds");
+assert(Array.isArray(FOODS), "FOODS should be exported as the single source dataset");
+assert.strictEqual(FOODS.length, foods.length, "Hydrated foods should come from the single FOODS dataset");
+assert.deepStrictEqual(
+  foods.map((food) => food.id),
+  FOODS.map((food) => food.id),
+  "Rendered foods should preserve the single-source food order"
+);
+assert(script.includes("const CALIBRATE = false;"), "Published script should keep calibration mode disabled");
 assert.strictEqual(calculateRemainingDays({ expiryDay: 3 }, DEMO_TODAY), 3);
 assert.strictEqual(evaluateFreshnessState({ freshness: 86, remainingDays: 3 }), "fresh");
 assert.strictEqual(evaluateFreshnessState({ freshness: 68, remainingDays: 1 }), "eat-soon");
@@ -59,13 +71,14 @@ for (const food of foods) {
   assert(/^assets\/foods\/.+\.(jpg|jpeg|png|webp)$/i.test(food.image), `${food.name} image must be a local food asset`);
   assert(!/^https?:\/\//i.test(food.image), `${food.name} image must not be a remote URL`);
   assert(fs.existsSync(path.resolve(__dirname, "..", food.image)), `${food.name} image file does not exist`);
-  assert(food.bbox, `${food.name} is missing bbox`);
-  for (const key of ["left", "top", "width", "height"]) {
-    assert.strictEqual(typeof food.bbox[key], "number", `${food.name} bbox.${key} must be numeric`);
-    assert(food.bbox[key] >= 0 && food.bbox[key] <= 100, `${food.name} bbox.${key} must be a percentage`);
+  assert(food.box, `${food.name} is missing box`);
+  assert(!food.bbox, `${food.name} should use normalized box instead of legacy bbox`);
+  for (const key of ["x", "y", "w", "h"]) {
+    assert.strictEqual(typeof food.box[key], "number", `${food.name} box.${key} must be numeric`);
+    assert(food.box[key] >= 0 && food.box[key] <= 1, `${food.name} box.${key} must be normalized between 0 and 1`);
   }
-  assert(food.bbox.left + food.bbox.width <= 100, `${food.name} bbox should fit horizontally`);
-  assert(food.bbox.top + food.bbox.height <= 100, `${food.name} bbox should fit vertically`);
+  assert(food.box.x + food.box.w <= 1, `${food.name} box should fit horizontally`);
+  assert(food.box.y + food.box.h <= 1, `${food.name} box should fit vertically`);
 }
 
 const beefCard = renderFoodCard(foods[0]);
@@ -76,10 +89,12 @@ assert(!beefCard.includes("http://") && !beefCard.includes("https://"), "Food ca
 
 const detectionOverlay = renderDetectionOverlay(foods);
 assert.strictEqual((detectionOverlay.match(/class="detection-box/g) || []).length, foods.length);
+assert.strictEqual((detectionOverlay.match(/data-detection-food-id=/g) || []).length, foods.length);
 assert(detectionOverlay.includes("牛肉 3天后"));
 assert(detectionOverlay.includes("鸡蛋 新鲜"));
 assert(detectionOverlay.includes("牛奶 今天到期"));
 assert(detectionOverlay.includes("鸡胸肉 已过期"));
+assert(detectionOverlay.includes("--box-left:"));
 assert(!detectionOverlay.includes("http://") && !detectionOverlay.includes("https://"), "Detection overlay should not render remote images");
 
 const groups = getReminderGroups(foods);
