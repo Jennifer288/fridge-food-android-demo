@@ -50,6 +50,7 @@ assert(
   css.includes("height: clamp(260px, 48vw, 340px);"),
   "Hero image area should use responsive clamp height"
 );
+assert(css.includes('url("assets/fridge-hero.png")'), "Hero should use the real fridge interior image as its background");
 assert(css.includes(".round-button:active"), "Settings button should have a lightweight pressed state");
 assert(css.includes("stroke-width: 1.75"), "Settings icon should use a thin line weight");
 
@@ -82,6 +83,7 @@ const detectionBoxBlock = css.match(/\.hero-detection-box\s*\{[\s\S]*?\n\}/);
 assert(detectionBoxBlock, "Missing hero detection box CSS block");
 assert(detectionBoxBlock[0].includes("border: 1.5px solid var(--detect-color);"), "Detection boxes should be thin overlays");
 assert(detectionBoxBlock[0].includes("background: transparent;"), "Detection boxes should not become food cards");
+assert(detectionBoxBlock[0].includes("box-shadow: none;"), "Detection boxes should stay as overlays instead of raised cards");
 
 for (const forbidden of ["--terracotta", "--ochre", "--amber", "--blue", "--line", "#f97316", "#c66b3d"]) {
   assert(!css.includes(forbidden), `Forbidden legacy accent remains: ${forbidden}`);
