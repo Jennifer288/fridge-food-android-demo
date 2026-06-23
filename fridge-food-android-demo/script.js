@@ -1,5 +1,6 @@
 const DEMO_TODAY = 0;
 const CALIBRATE = false;
+const SCAN_SWEEP_MS = 1100;
 
 const CATEGORIES = {
   ALL: "all",
@@ -338,6 +339,37 @@ function getFreshnessPill(food) {
   return { tone: "fresh", label: "新鲜" };
 }
 
+function animateCount(el, from, to, duration) {
+  if (!el) {
+    return;
+  }
+
+  const suffix = el.dataset.countSuffix || "";
+  const start = Number(from) || 0;
+  const end = Number(to) || 0;
+  const total = Number(duration) || 600;
+  const raf = typeof requestAnimationFrame === "function"
+    ? requestAnimationFrame
+    : (callback) => setTimeout(() => callback(Date.now()), 16);
+  const now = typeof performance !== "undefined" && performance.now
+    ? () => performance.now()
+    : () => Date.now();
+  const startedAt = now();
+
+  function tick(timestamp) {
+    const progress = Math.min((timestamp - startedAt) / total, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = `${Math.round(start + (end - start) * eased)}${suffix}`;
+
+    if (progress < 1) {
+      raf(tick);
+    }
+  }
+
+  el.textContent = `${start}${suffix}`;
+  raf(tick);
+}
+
 function getHeroStatusLabel(food) {
   if (food.remainingDays < 0) {
     return "过期";
@@ -398,12 +430,12 @@ function renderFoodPhoto(food) {
   `;
 }
 
-function renderFoodCard(food) {
+function renderFoodCard(food, index = 0) {
   const pill = getFreshnessPill(food);
   const name = escapeHtml(food.name);
 
   return `
-    <article class="food-card state-${food.state} freshness-${pill.tone}" data-food-id="${food.id}" tabindex="0" role="button" aria-label="查看 ${name} 详情">
+    <article class="food-card card-enter state-${food.state} freshness-${pill.tone}" data-food-id="${food.id}" style="--card-delay:${index * 60}ms;" tabindex="0" role="button" aria-label="查看 ${name} 详情">
       ${renderFoodPhoto(food)}
       <div class="food-main">
         <div class="food-title-row">
@@ -412,11 +444,11 @@ function renderFoodCard(food) {
         </div>
         <p>${escapeHtml(food.categoryLabel)} · ${escapeHtml(food.zone)}</p>
         <div class="freshness-line">
-          <span><b>${food.freshness}%</b> 新鲜度</span>
+          <span><b data-count-up="${food.freshness}" data-count-suffix="%">0%</b> 新鲜度</span>
           <span>${formatRemainingDays(food.remainingDays)}</span>
         </div>
         <div class="freshness-track" aria-hidden="true">
-          <i style="width:${food.freshness}%"></i>
+          <i data-freshness-value="${food.freshness}" style="--freshness-width:${food.freshness}%"></i>
         </div>
       </div>
     </article>
@@ -446,7 +478,7 @@ function renderHeroSceneItems(foods) {
 }
 
 function renderDetectionBoxes(foods, highlightedFoodId = "") {
-  return foods.map((food) => {
+  return foods.map((food, index) => {
     const pill = getFreshnessPill(food);
     const highlight = highlightedFoodId === food.id ? " is-highlighted" : "";
     const name = escapeHtml(food.name);
@@ -460,7 +492,7 @@ function renderDetectionBoxes(foods, highlightedFoodId = "") {
         data-hero-y="${food.hero.y}"
         data-hero-w="${food.hero.w}"
         data-hero-h="${food.hero.h}"
-        style="${getHeroStyle(food)}"
+        style="${getHeroStyle(food)}--box-delay:${index * 80}ms;"
         aria-label="${label}"
       >
         <span class="bbox-label">${label}</span>
@@ -487,7 +519,9 @@ function renderDetectionOverlay(foods, highlightedFoodId = "") {
 
 function renderScanCard(state) {
   const foods = state.scanned ? state.foods : [];
-  const scanStatus = state.scanned ? `AI 已识别 ${foods.length} 个食材` : "等待冰箱拍照";
+  const scanStatus = state.scanned
+    ? `<span class="scan-status"><i class="live-dot" aria-hidden="true"></i>AI 已识别 <b data-count-up="${foods.length}">0</b> 个食材</span>`
+    : "等待冰箱拍照";
   const urgentCount = state.scanned ? countUrgentReminders(foods) : 0;
 
   return `
@@ -502,7 +536,7 @@ function renderScanCard(state) {
         ${state.scanned ? renderDetectionOverlay(foods, state.highlightedFoodId) : ""}
         <div class="scan-overlay">
           <span>${scanStatus}</span>
-          <strong>${foods.length} 个食材</strong>
+          <strong><b data-count-up="${foods.length}">0</b> 个食材</strong>
         </div>
       </div>
       <div class="summary-strip">
@@ -549,7 +583,7 @@ function renderInventoryList(foods, scanned, activeCategory) {
     return renderEmptyState("这个分类暂时没有食材", "换一个分类，或者重新扫描冰箱。");
   }
 
-  return `<div class="inventory-list">${filteredFoods.map(renderFoodCard).join("")}</div>`;
+  return `<div class="inventory-list">${filteredFoods.map((food, index) => renderFoodCard(food, index)).join("")}</div>`;
 }
 
 function renderReminderPreview(foods, scanned) {
@@ -745,7 +779,8 @@ function renderPageContent(pageId, state) {
 }
 
 function renderNavItems(activePage) {
-  return NAV_ITEMS.map((item) => {
+  const activeIndex = Math.max(NAV_ITEMS.findIndex((item) => item.id === activePage), 0);
+  const itemsMarkup = NAV_ITEMS.map((item) => {
     const active = activePage === item.id ? " is-active" : "";
     const className = item.id === "scan" ? `camera-fab${active}` : `nav-item${active}`;
 
@@ -756,6 +791,8 @@ function renderNavItems(activePage) {
       </button>
     `;
   }).join("");
+
+  return `${itemsMarkup}<span class="nav-indicator" style="--nav-index:${activeIndex};--nav-x:${activeIndex * 100}%;" aria-hidden="true"></span>`;
 }
 
 if (typeof document !== "undefined") {
@@ -773,6 +810,61 @@ if (typeof document !== "undefined") {
     return document.getElementById(id);
   }
 
+  function animateRenderedMotion(root = document) {
+    const countEls = root.querySelectorAll("[data-count-up]");
+    countEls.forEach((el) => {
+      animateCount(el, 0, Number(el.dataset.countUp), 600);
+    });
+
+    const tracks = root.querySelectorAll(".freshness-track i[data-freshness-value]");
+    tracks.forEach((track) => {
+      track.classList.remove("is-filled");
+      requestAnimationFrame(() => {
+        track.classList.add("is-filled");
+      });
+    });
+  }
+
+  function runScanBeam() {
+    const preview = document.querySelector(".scan-preview");
+    if (!preview) {
+      return;
+    }
+
+    preview.querySelectorAll(".scan-beam").forEach((beam) => beam.remove());
+    const beam = document.createElement("span");
+    beam.className = "scan-beam";
+    beam.setAttribute("aria-hidden", "true");
+    preview.appendChild(beam);
+    beam.addEventListener("animationend", () => beam.remove(), { once: true });
+  }
+
+  function clearScanBeams() {
+    document.querySelectorAll(".scan-beam").forEach((beam) => beam.remove());
+  }
+
+  function setScanLoading(isLoading) {
+    const startScan = getElement("startScan");
+    if (startScan) {
+      startScan.classList.toggle("is-loading", isLoading);
+      startScan.disabled = isLoading;
+    }
+  }
+
+  function triggerNavIconTap(pageId) {
+    const icon = getElement("bottomNav").querySelector(`[data-nav="${pageId}"] svg`);
+    if (!icon) {
+      return;
+    }
+
+    icon.classList.remove("icon-tap");
+    void icon.offsetWidth;
+    icon.classList.add("icon-tap");
+    icon.addEventListener("animationend", () => {
+      icon.classList.remove("icon-tap");
+    }, { once: true });
+  }
+
   function renderSheetDetectionLayer() {
     const sheetDetectionLayer = getElement("sheetDetectionLayer");
     if (!sheetDetectionLayer) {
@@ -788,6 +880,7 @@ if (typeof document !== "undefined") {
     getElement("pageContent").innerHTML = renderPageContent(appState.activePage, appState);
     getElement("bottomNav").innerHTML = renderNavItems(appState.activePage);
     renderSheetDetectionLayer();
+    requestAnimationFrame(() => animateRenderedMotion(getElement("pageContent")));
   }
 
   function openDetail(foodId) {
@@ -819,8 +912,8 @@ if (typeof document !== "undefined") {
         <span class="state-pill pill-${pill.tone}">${pill.label}</span>
       </div>
       <div class="detail-score">
-        <span>${food.freshness}%</span>
-        <div class="freshness-track" aria-hidden="true"><i style="width:${food.freshness}%"></i></div>
+        <span data-count-up="${food.freshness}" data-count-suffix="%">0%</span>
+        <div class="freshness-track" aria-hidden="true"><i data-freshness-value="${food.freshness}" style="--freshness-width:${food.freshness}%"></i></div>
       </div>
       <dl class="detail-grid">
         <div><dt>状态</dt><dd>${STATE_LABELS[food.state]}</dd></div>
@@ -831,6 +924,8 @@ if (typeof document !== "undefined") {
       <p class="detail-tip"><b>建议：</b>${escapeHtml(food.action)}</p>
       <p class="detail-tip"><b>存放：</b>${escapeHtml(food.storageTip)}</p>
     `;
+
+    requestAnimationFrame(() => animateRenderedMotion(detailContent));
 
     detailSheet.classList.add("is-open");
     detailSheet.setAttribute("aria-hidden", "false");
@@ -852,6 +947,8 @@ if (typeof document !== "undefined") {
   function closeScanSheet() {
     const scanSheet = getElement("scanSheet");
     clearTimeout(appState.scanTimer);
+    clearScanBeams();
+    setScanLoading(false);
     scanSheet.classList.remove("is-open");
     scanSheet.setAttribute("aria-hidden", "true");
     getElement("scanProgress").textContent = "准备识别冰箱照片";
@@ -859,22 +956,21 @@ if (typeof document !== "undefined") {
 
   function startScanSimulation() {
     const scanProgress = getElement("scanProgress");
-    const startScan = getElement("startScan");
-
     clearTimeout(appState.scanTimer);
-    startScan.disabled = true;
+    setScanLoading(true);
     scanProgress.textContent = "正在分析肉蛋奶、蔬果、饮品和冷冻区...";
+    runScanBeam();
 
     appState.scanTimer = window.setTimeout(() => {
       appState.foods = createRecognizedFoods();
       appState.scanned = true;
       appState.activeCategory = CATEGORIES.ALL;
       scanProgress.textContent = "识别完成：已生成食材清单";
-      startScan.disabled = false;
+      setScanLoading(false);
       renderApp();
 
       window.setTimeout(closeScanSheet, 650);
-    }, 850);
+    }, SCAN_SWEEP_MS);
   }
 
   function handlePageClick(event) {
@@ -904,6 +1000,7 @@ if (typeof document !== "undefined") {
     }
     appState.activePage = navTarget.dataset.nav;
     renderApp();
+    triggerNavIconTap(appState.activePage);
   }
 
   function clamp(value, min, max) {
