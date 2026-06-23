@@ -169,10 +169,11 @@ assert(chickenHero.w >= 0.10 && chickenHero.w <= 0.15, "Chicken box should be me
 assert(chickenHero.h >= 0.12 && chickenHero.h <= 0.18, "Chicken box should be medium height");
 assert(horizontalOverlap(beefHero, chickenHero) <= 0.04, "Beef and chicken boxes should not overlap heavily");
 
-assert(orangeHero.x >= 0.82 && orangeHero.x <= 0.87, "Orange juice box should move into the fridge interior");
-assert(orangeHero.y >= 0.52 && orangeHero.y <= 0.57, "Orange juice box should start around an interior shelf bottle");
-assert(orangeHero.w >= 0.05 && orangeHero.w <= 0.08, "Orange juice box should stay narrow around the bottle");
-assert(orangeHero.h >= 0.26 && orangeHero.h <= 0.34, "Orange juice box should stay tall around the bottle");
+assert(orangeHero.x >= 0.90 && orangeHero.x <= 0.94, "Orange juice box should target the real right-door bottle without hugging the viewport edge");
+assert(orangeHero.y >= 0.54 && orangeHero.y <= 0.60, "Orange juice box should start around the real right-door bottle body");
+assert(orangeHero.w >= 0.045 && orangeHero.w <= 0.07, "Orange juice box should stay narrow around the real bottle");
+assert(orangeHero.h >= 0.30 && orangeHero.h <= 0.38, "Orange juice box should stay tall around the real bottle");
+assert(orangeHero.x + orangeHero.w <= 0.98, "Orange juice box should leave room for its label inside the hero");
 
 const beefCard = renderFoodCard(foods[0]);
 assert(beefCard.includes("<img"), "Food card should render an image thumbnail");
