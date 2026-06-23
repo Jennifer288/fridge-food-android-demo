@@ -1,4 +1,6 @@
 const assert = require("assert");
+const fs = require("fs");
+const path = require("path");
 const {
   CATEGORIES,
   DEMO_TODAY,
@@ -9,6 +11,7 @@ const {
   filterFoodsByCategory,
   countUrgentReminders,
   getFreshnessPill,
+  renderFoodCard,
 } = require("../script.js");
 
 const foods = createRecognizedFoods();
@@ -33,6 +36,19 @@ assert.strictEqual(filterFoodsByCategory(foods, CATEGORIES.MEAT_EGG_DAIRY).lengt
 assert.strictEqual(filterFoodsByCategory(foods, CATEGORIES.FRUIT_VEG).length, 3);
 assert.strictEqual(filterFoodsByCategory(foods, CATEGORIES.FROZEN).length, 1);
 assert.strictEqual(countUrgentReminders(foods), 5);
+
+for (const food of foods) {
+  assert(food.image, `${food.name} is missing an image path`);
+  assert(/^assets\/foods\/.+\.(jpg|jpeg|png|webp)$/i.test(food.image), `${food.name} image must be a local food asset`);
+  assert(!/^https?:\/\//i.test(food.image), `${food.name} image must not be a remote URL`);
+  assert(fs.existsSync(path.resolve(__dirname, "..", food.image)), `${food.name} image file does not exist`);
+}
+
+const beefCard = renderFoodCard(foods[0]);
+assert(beefCard.includes("<img"), "Food card should render an image thumbnail");
+assert(beefCard.includes('class="food-thumb"'), "Food card image should use food-thumb class");
+assert(beefCard.includes('class="food-thumb-fallback"'), "Food card should include fallback content");
+assert(!beefCard.includes("http://") && !beefCard.includes("https://"), "Food card should not render remote images");
 
 assert.deepStrictEqual(getFreshnessPill({ remainingDays: 5 }), {
   tone: "fresh",
