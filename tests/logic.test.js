@@ -128,6 +128,47 @@ for (const food of foods) {
   assert(food.hero.y + food.hero.h <= 1, `${food.name} hero should fit vertically`);
 }
 
+function getFoodById(id) {
+  const food = foods.find((item) => item.id === id);
+  assert(food, `Missing food ${id}`);
+  return food;
+}
+
+function assertHeroBox(id, expected) {
+  assert.deepStrictEqual(getFoodById(id).hero, expected, `${id} hero box should not be changed by this adjustment`);
+}
+
+function horizontalOverlap(first, second) {
+  return Math.max(0, Math.min(first.x + first.w, second.x + second.w) - Math.max(first.x, second.x));
+}
+
+assertHeroBox("eggs", { x: 0.77, y: 0.37, w: 0.16, h: 0.13 });
+assertHeroBox("milk", { x: 0.68, y: 0.08, w: 0.11, h: 0.43 });
+assertHeroBox("tomato", { x: 0.25, y: 0.64, w: 0.26, h: 0.17 });
+assertHeroBox("lettuce", { x: 0.20, y: 0.14, w: 0.18, h: 0.33 });
+assertHeroBox("yogurt", { x: 0.50, y: 0.57, w: 0.12, h: 0.24 });
+assertHeroBox("blueberry", { x: 0.37, y: 0.37, w: 0.16, h: 0.14 });
+
+const beefHero = getFoodById("beef").hero;
+const chickenHero = getFoodById("chicken").hero;
+const orangeHero = getFoodById("orangeJuice").hero;
+
+assert(beefHero.x >= 0.68 && beefHero.x <= 0.76, "Beef box should sit over the right-side red meat tray");
+assert(beefHero.y >= 0.64 && beefHero.y <= 0.72, "Beef box should stay on the middle-lower shelf");
+assert(beefHero.w >= 0.14 && beefHero.w <= 0.20, "Beef box should be wide enough for the horizontal tray without covering too much");
+assert(beefHero.h >= 0.11 && beefHero.h <= 0.17, "Beef box should stay relatively low over the tray");
+
+assert(chickenHero.x >= 0.58 && chickenHero.x <= 0.67, "Chicken box should sit near the center-right meat area");
+assert(chickenHero.y >= 0.64 && chickenHero.y <= 0.72, "Chicken box should align with the meat tray shelf");
+assert(chickenHero.w >= 0.10 && chickenHero.w <= 0.15, "Chicken box should be medium width");
+assert(chickenHero.h >= 0.12 && chickenHero.h <= 0.18, "Chicken box should be medium height");
+assert(horizontalOverlap(beefHero, chickenHero) <= 0.04, "Beef and chicken boxes should not overlap heavily");
+
+assert(orangeHero.x >= 0.87 && orangeHero.x <= 0.90, "Orange juice box should move inward from the right edge");
+assert(orangeHero.y >= 0.50 && orangeHero.y <= 0.58, "Orange juice box should start around the right door bottle body");
+assert(orangeHero.w >= 0.07 && orangeHero.w <= 0.09, "Orange juice box should stay narrow around the bottle");
+assert(orangeHero.h >= 0.34 && orangeHero.h <= 0.40, "Orange juice box should stay tall around the bottle");
+
 const beefCard = renderFoodCard(foods[0]);
 assert(beefCard.includes("<img"), "Food card should render an image thumbnail");
 assert(beefCard.includes('class="food-thumb"'), "Food card image should use food-thumb class");
