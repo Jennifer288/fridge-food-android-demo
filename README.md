@@ -4,6 +4,24 @@
 
 大模型识别、真实相机、图片上传和推送通知都不在本 demo 范围内；这里用本地图片和固定数据模拟完整体验。
 
+在线网页 Demo：
+
+```text
+https://jennifer288.github.io/fridge-food-android-demo/
+```
+
+真正的 Android WebView App 工程在仓库根目录：
+
+```text
+android-app/
+```
+
+构建后的 debug APK 路径：
+
+```text
+android-app/app/build/outputs/apk/debug/app-debug.apk
+```
+
 ## 功能
 
 - 冰箱拍照识别模拟流程
@@ -45,6 +63,13 @@ node tests/logic.test.js
 
 ```bash
 clang -fsyntax-only food_freshness_logic.c
+```
+
+Android APK 构建请回到仓库根目录查看 `README.md`，或运行：
+
+```bash
+cd android-app
+./gradlew assembleDebug
 ```
 
 ## UI 与 C 逻辑映射
