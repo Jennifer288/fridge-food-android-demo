@@ -36,6 +36,11 @@ assert.deepStrictEqual(
   "Rendered foods should preserve the single-source food order"
 );
 assert(script.includes("const CALIBRATE = false;"), "Published script should keep calibration mode disabled");
+assert(script.includes("function animateCount("), "Shared animateCount helper should exist");
+assert(script.includes("runScanBeam"), "Scan reveal should create a scan beam before showing detections");
+assert(script.includes("appState.foods = createRecognizedFoods();"), "Scan simulation should keep assigning recognized foods");
+assert(script.includes("appState.scanned = true;"), "Scan simulation should keep setting scanned state");
+assert(script.includes("renderApp();"), "Scan simulation should still render the app after recognition");
 assert.strictEqual(calculateRemainingDays({ expiryDay: 3 }, DEMO_TODAY), 3);
 assert.strictEqual(evaluateFreshnessState({ freshness: 86, remainingDays: 3 }), "fresh");
 assert.strictEqual(evaluateFreshnessState({ freshness: 68, remainingDays: 1 }), "eat-soon");
@@ -86,6 +91,9 @@ const beefCard = renderFoodCard(foods[0]);
 assert(beefCard.includes("<img"), "Food card should render an image thumbnail");
 assert(beefCard.includes('class="food-thumb"'), "Food card image should use food-thumb class");
 assert(beefCard.includes('class="food-thumb-fallback"'), "Food card should include fallback content");
+assert(beefCard.includes("card-enter"), "Food card should use card enter animation class");
+assert(beefCard.includes("data-count-up"), "Food card freshness percentage should be count-up animated");
+assert(beefCard.includes("--freshness-width"), "Food card freshness bar should use an animated target width");
 assert(!beefCard.includes("http://") && !beefCard.includes("https://"), "Food card should not render remote images");
 
 const detectionOverlay = renderDetectionOverlay(foods);
@@ -99,6 +107,8 @@ assert(detectionOverlay.includes("鸡蛋 新鲜"));
 assert(detectionOverlay.includes("牛奶 到期"));
 assert(detectionOverlay.includes("鸡胸肉 过期"));
 assert(detectionOverlay.includes("--hero-left:"));
+assert(detectionOverlay.includes("--box-delay:0ms"), "First detection box should have zero stagger delay");
+assert(detectionOverlay.includes("--box-delay:80ms"), "Detection boxes should include stagger delays");
 assert(!detectionOverlay.includes("..."), "Hero labels should never contain ellipsis text");
 assert(!detectionOverlay.includes("http://") && !detectionOverlay.includes("https://"), "Detection overlay should not render remote images");
 
@@ -114,6 +124,9 @@ const inventoryMarkup = renderPageContent("inventory", {
   scanned: true,
   activeCategory: CATEGORIES.ALL,
 });
+assert.strictEqual((inventoryMarkup.match(/card-enter/g) || []).length, foods.length);
+assert(inventoryMarkup.includes("--card-delay:0ms"), "First food card should have zero enter delay");
+assert(inventoryMarkup.includes("--card-delay:60ms"), "Food cards should include staggered enter delays");
 const inventoryFoodIds = [...inventoryMarkup.matchAll(/data-food-id="([^"]+)"/g)]
   .map((match) => match[1])
   .filter((id, index, ids) => ids.indexOf(id) === index);
@@ -147,6 +160,8 @@ for (const item of NAV_ITEMS) {
 const navMarkup = renderNavItems("recipes");
 assert(navMarkup.includes('data-nav="recipes"'));
 assert(navMarkup.includes("is-active"));
+assert(navMarkup.includes("nav-indicator"), "Bottom nav should render a moving indicator");
+assert(navMarkup.includes("--nav-index:3"), "Nav indicator should target the active item index");
 
 assert.deepStrictEqual(getFreshnessPill({ remainingDays: 5 }), {
   tone: "fresh",

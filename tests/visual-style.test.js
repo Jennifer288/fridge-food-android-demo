@@ -53,6 +53,13 @@ assert(
 assert(css.includes('url("assets/fridge-hero.png")'), "Hero should use the real fridge interior image as its background");
 assert(css.includes(".round-button:active"), "Settings button should have a lightweight pressed state");
 assert(css.includes("stroke-width: 1.75"), "Settings icon should use a thin line weight");
+assert(css.includes("@media (prefers-reduced-motion: reduce)"), "Reduced motion guard should be present");
+assert(css.includes("animation: none !important;"), "Reduced motion should disable animations");
+assert(css.includes("transition: none !important;"), "Reduced motion should disable transitions");
+
+for (const keyframe of ["scanSweep", "boxPop", "cardRise", "iconTap", "expirePulse", "spin", "livePulse"]) {
+  assert(css.includes(`@keyframes ${keyframe}`), `Missing ${keyframe} keyframes`);
+}
 
 const bottomNavBlock = css.match(/\.bottom-nav\s*\{[\s\S]*?\n\}/);
 assert(bottomNavBlock, "Missing bottom nav CSS block");
@@ -85,6 +92,26 @@ assert(detectionBoxBlock[0].includes("border: 1.5px solid var(--detect-color);")
 assert(detectionBoxBlock[0].includes("background: transparent;"), "Detection boxes should not become food cards");
 assert(detectionBoxBlock[0].includes("box-shadow: none;"), "Detection boxes should stay as overlays instead of raised cards");
 
+assert(css.includes(".scan-beam"), "Scan beam overlay should be styled");
+assert(css.includes("animation: scanSweep 1100ms ease-in-out forwards;"), "Scan beam should sweep for about 1100ms");
+assert(css.includes("animation-delay: var(--box-delay);"), "Detection boxes should use stagger delay");
+assert(css.includes("transition: width 700ms cubic-bezier(.22,.61,.36,1);"), "Freshness bars should animate width");
+assert(css.includes("box-shadow: inset 0 1px 0 rgba(255,255,255,.35);"), "Freshness bars should include subtle highlight");
+assert(css.includes(".card-enter"), "Inventory cards should use card enter animation");
+assert(css.includes(".nav-indicator"), "Bottom nav indicator should be styled");
+assert(css.includes(".icon-tap"), "Nav icons should support tap animation");
+assert(css.includes(".wide-action.is-loading::before"), "Loading spinner should be available on scan button");
+assert(css.includes(".live-dot"), "AI recognized label should include a live status dot");
+
+const expirePulseRule = css.match(/\.hero-detection-box\.detection-expire\s*\{[\s\S]*?\n\}/);
+assert(expirePulseRule && expirePulseRule[0].includes("expirePulse"), "Only expire detection boxes should pulse");
+
+const freshPulseRule = css.match(/\.hero-detection-box\.detection-fresh\s*\{[\s\S]*?\n\}/);
+assert(!freshPulseRule || !freshPulseRule[0].includes("expirePulse"), "Fresh boxes should not use expire pulse");
+
+const soonPulseRule = css.match(/\.hero-detection-box\.detection-soon\s*\{[\s\S]*?\n\}/);
+assert(!soonPulseRule || !soonPulseRule[0].includes("expirePulse"), "Soon boxes should not use expire pulse");
+
 for (const forbidden of ["--terracotta", "--ochre", "--amber", "--blue", "--line", "#f97316", "#c66b3d"]) {
   assert(!css.includes(forbidden), `Forbidden legacy accent remains: ${forbidden}`);
 }
@@ -98,6 +125,8 @@ const allowedBorders = new Set([
   "border: 0;",
   "border: none;",
   "border: 1.5px solid var(--detect-color);",
+  "border: 2px solid rgba(255,255,255,.42);",
+  "border-top: 4px solid var(--detect-color);",
 ]);
 
 for (const declaration of borderDeclarations) {

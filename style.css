@@ -1028,3 +1028,217 @@ p {
     width: 100%;
   }
 }
+
+.scan-beam {
+  position: absolute;
+  z-index: 4;
+  top: -18%;
+  left: 0;
+  right: 0;
+  height: 46px;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(231, 244, 236, 0.5), rgba(255, 255, 255, 0)),
+    linear-gradient(90deg, rgba(46, 125, 91, 0), rgba(46, 125, 91, 0.34), rgba(46, 125, 91, 0));
+  animation: scanSweep 1100ms ease-in-out forwards;
+}
+
+.hero-detection-box {
+  transform-origin: center;
+  animation: boxPop 260ms ease-out both;
+  animation-delay: var(--box-delay);
+}
+
+.hero-detection-box.detection-expire {
+  animation:
+    boxPop 260ms ease-out both,
+    expirePulse 2s ease-in-out infinite;
+  animation-delay: var(--box-delay), calc(var(--box-delay) + 260ms);
+}
+
+.bbox-label::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  bottom: -4px;
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid var(--detect-color);
+}
+
+.live-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: var(--r-pill);
+  background: var(--color-primary);
+  animation: livePulse 1.6s ease-in-out infinite;
+}
+
+.scan-status {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+}
+
+.freshness-track,
+.freshness-track i {
+  border-radius: var(--r-pill);
+}
+
+.freshness-track i {
+  width: 0;
+  transition: width 700ms cubic-bezier(.22,.61,.36,1);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
+}
+
+.freshness-track i.is-filled {
+  width: var(--freshness-width);
+}
+
+.card-enter {
+  opacity: 0;
+  animation: cardRise 360ms ease-out forwards;
+  animation-delay: var(--card-delay);
+}
+
+.food-photo {
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.05);
+}
+
+.bottom-nav {
+  --nav-segment: 20%;
+}
+
+.nav-indicator {
+  position: absolute;
+  left: 0;
+  bottom: 4px;
+  width: var(--nav-segment);
+  height: 6px;
+  pointer-events: none;
+  transform: translateX(var(--nav-x));
+  transition: transform 260ms cubic-bezier(.4,0,.2,1);
+}
+
+.nav-indicator::after {
+  content: "";
+  display: block;
+  width: 20px;
+  height: 6px;
+  margin: 0 auto;
+  border-radius: var(--r-pill);
+  background: var(--color-primary);
+}
+
+.icon-tap {
+  animation: iconTap 220ms ease-out;
+}
+
+.camera-fab:active {
+  transform: scale(.92);
+}
+
+.wide-action.is-loading {
+  position: relative;
+  color: transparent;
+}
+
+.wide-action.is-loading > svg {
+  opacity: 0;
+}
+
+.wide-action.is-loading::before {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,.42);
+  border-top-color: var(--bg-card);
+  border-radius: var(--r-pill);
+  animation: spin 700ms linear infinite;
+}
+
+@keyframes scanSweep {
+  from {
+    top: -18%;
+  }
+  to {
+    top: 100%;
+  }
+}
+
+@keyframes boxPop {
+  from {
+    opacity: 0;
+    transform: scale(.82);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes cardRise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes iconTap {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(.9);
+  }
+  72% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes expirePulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(154, 59, 44, 0);
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(154, 59, 44, .24);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes livePulse {
+  0%,
+  100% {
+    opacity: .4;
+    transform: scale(.86);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
