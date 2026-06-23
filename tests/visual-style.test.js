@@ -34,6 +34,14 @@ for (const [name, value] of Object.entries(requiredTokens)) {
 assert(!html.includes("phone-status"), "Fake phone status bar should be removed from HTML");
 assert(!html.includes("status-icons"), "Fake status icons should be removed from HTML");
 
+for (const navId of ["inventory", "reminders", "scan", "recipes", "profile"]) {
+  assert(html.includes(`data-nav="${navId}"`), `Missing bottom nav button for ${navId}`);
+}
+
+for (const selector of [".detection-layer", ".detection-box", ".page-view", ".recipe-card", ".profile-stat"]) {
+  assert(css.includes(selector), `Missing visual style for ${selector}`);
+}
+
 for (const forbidden of ["--terracotta", "--ochre", "--amber", "--blue", "--line", "#f97316", "#c66b3d"]) {
   assert(!css.includes(forbidden), `Forbidden legacy accent remains: ${forbidden}`);
 }
