@@ -16,6 +16,67 @@ const CATEGORY_LABELS = {
   [CATEGORIES.FROZEN]: "冷冻",
 };
 
+const NAV_ITEMS = [
+  {
+    id: "inventory",
+    label: "库存",
+    icon: '<path d="M5 4h14v16H5V4Z" /><path d="M8 8h8M8 12h8M8 16h5" />',
+  },
+  {
+    id: "reminders",
+    label: "提醒",
+    icon: '<path d="M6 10a6 6 0 1 1 12 0v4l2 3H4l2-3v-4Z" /><path d="M10 20h4" />',
+  },
+  {
+    id: "scan",
+    label: "拍照",
+    icon: '<path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.2l1.2-2h6.2l1.2 2h1.2A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-8Z" /><path d="M12 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />',
+  },
+  {
+    id: "recipes",
+    label: "菜谱",
+    icon: '<path d="M6 4h12v16H6V4Z" /><path d="M9 8h6M9 12h6M9 16h3" />',
+  },
+  {
+    id: "profile",
+    label: "我的",
+    icon: '<path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /><path d="M4 21a8 8 0 0 1 16 0" />',
+  },
+];
+
+const RECIPE_DEFINITIONS = [
+  {
+    name: "番茄牛肉意面",
+    ingredientIds: ["tomato", "beef"],
+    reason: "优先消耗临期番茄和 3 天后到期的牛肉。",
+    steps: ["番茄炒出汤汁后加入牛肉片。", "拌入意面，小火收汁后装盘。"],
+  },
+  {
+    name: "鸡胸肉生菜沙拉",
+    ingredientIds: ["chicken", "lettuce"],
+    reason: "把已过期鸡胸肉移出清单，保留沙拉搭配作为替换建议。",
+    steps: ["检查鸡胸肉状态，过期则不要食用。", "可用新鲜肉类替换，搭配生菜和轻酱汁。"],
+  },
+  {
+    name: "蓝莓酸奶杯",
+    ingredientIds: ["blueberry", "yogurt"],
+    reason: "酸奶今天到期，适合和蓝莓一起快速消耗。",
+    steps: ["酸奶倒入杯中，铺上蓝莓。", "冷藏 10 分钟后直接食用。"],
+  },
+  {
+    name: "鸡蛋牛奶早餐盘",
+    ingredientIds: ["eggs", "milk"],
+    reason: "鸡蛋状态新鲜，牛奶今天到期，适合早餐组合。",
+    steps: ["鸡蛋煎熟或水煮。", "牛奶搭配燕麦或吐司一起食用。"],
+  },
+  {
+    name: "橙汁蓝莓酸奶饮",
+    ingredientIds: ["orangeJuice", "blueberry", "yogurt"],
+    reason: "橙汁 2 天后到期，适合搭配酸奶做饮品。",
+    steps: ["橙汁、酸奶和蓝莓放入杯中。", "轻轻搅拌，冷藏后饮用。"],
+  },
+];
+
 function calculateRemainingDays(food, today = DEMO_TODAY) {
   return food.expiryDay - today;
 }
@@ -45,6 +106,8 @@ function getReminderFlags(food) {
     flags.push("expires-today");
   } else if (food.remainingDays === 1) {
     flags.push("expires-tomorrow");
+  } else if (food.remainingDays <= 3) {
+    flags.push("expires-soon");
   }
 
   if (food.freshness < 40) {
@@ -80,6 +143,7 @@ function createRecognizedFoods(today = DEMO_TODAY) {
       purchaseDay: -2,
       expiryDay: 3,
       image: "assets/foods/beef.jpg",
+      bbox: { left: 10, top: 54, width: 25, height: 18 },
       storageTip: "密封冷藏，建议分装后靠内侧存放。",
       action: "3 天内适合煎炒或炖煮。",
       accent: "red",
@@ -90,12 +154,13 @@ function createRecognizedFoods(today = DEMO_TODAY) {
       category: CATEGORIES.MEAT_EGG_DAIRY,
       categoryLabel: "肉蛋奶",
       zone: "冷藏室",
-      freshness: 68,
-      purchaseDay: -8,
-      expiryDay: 1,
+      freshness: 88,
+      purchaseDay: -4,
+      expiryDay: 6,
       image: "assets/foods/eggs.jpg",
+      bbox: { left: 34, top: 18, width: 22, height: 15 },
       storageTip: "保留原包装，避免靠近冰箱门反复升温。",
-      action: "明天到期，优先做早餐或烘焙。",
+      action: "状态新鲜，适合早餐或烘焙。",
       accent: "amber",
     },
     {
@@ -108,6 +173,7 @@ function createRecognizedFoods(today = DEMO_TODAY) {
       purchaseDay: -5,
       expiryDay: 0,
       image: "assets/foods/milk.jpg",
+      bbox: { left: 6, top: 20, width: 17, height: 28 },
       storageTip: "开封后尽量放在冷藏室深处。",
       action: "今天喝完，适合搭配早餐。",
       accent: "blue",
@@ -118,12 +184,13 @@ function createRecognizedFoods(today = DEMO_TODAY) {
       category: CATEGORIES.FRUIT_VEG,
       categoryLabel: "蔬果",
       zone: "冷藏室",
-      freshness: 74,
-      purchaseDay: -3,
-      expiryDay: 2,
+      freshness: 72,
+      purchaseDay: -4,
+      expiryDay: 1,
       image: "assets/foods/tomato.jpg",
+      bbox: { left: 30, top: 62, width: 22, height: 15 },
       storageTip: "保持干燥，避免与叶菜挤压。",
-      action: "2 天内做沙拉或炒蛋。",
+      action: "明天前做沙拉或炒蛋。",
       accent: "red",
     },
     {
@@ -134,10 +201,11 @@ function createRecognizedFoods(today = DEMO_TODAY) {
       zone: "保鲜抽屉",
       freshness: 39,
       purchaseDay: -4,
-      expiryDay: 0,
+      expiryDay: 2,
       image: "assets/foods/lettuce.jpg",
+      bbox: { left: 12, top: 42, width: 25, height: 15 },
       storageTip: "用厨房纸吸水后装袋冷藏。",
-      action: "今天处理，变软叶片先挑出。",
+      action: "2 天内处理，变软叶片先挑出。",
       accent: "green",
     },
     {
@@ -146,12 +214,13 @@ function createRecognizedFoods(today = DEMO_TODAY) {
       category: CATEGORIES.MEAT_EGG_DAIRY,
       categoryLabel: "肉蛋奶",
       zone: "冷藏室",
-      freshness: 35,
+      freshness: 45,
       purchaseDay: -10,
-      expiryDay: -1,
+      expiryDay: 0,
       image: "assets/foods/yogurt.jpg",
-      storageTip: "已过期，不建议继续食用。",
-      action: "移出冰箱并丢弃。",
+      bbox: { left: 57, top: 22, width: 24, height: 16 },
+      storageTip: "今天到期，开封后不要继续久放。",
+      action: "今天吃完，适合搭配蓝莓。",
       accent: "purple",
     },
     {
@@ -160,12 +229,13 @@ function createRecognizedFoods(today = DEMO_TODAY) {
       category: CATEGORIES.MEAT_EGG_DAIRY,
       categoryLabel: "肉蛋奶",
       zone: "冷冻室",
-      freshness: 79,
-      purchaseDay: -7,
-      expiryDay: 5,
+      freshness: 32,
+      purchaseDay: -12,
+      expiryDay: -1,
       image: "assets/foods/chicken.jpg",
-      storageTip: "冷冻分装，解冻后不要再次冷冻。",
-      action: "适合安排本周健身餐。",
+      bbox: { left: 42, top: 76, width: 28, height: 16 },
+      storageTip: "已过期，不建议继续食用。",
+      action: "移出冰箱并丢弃。",
       accent: "red",
     },
     {
@@ -174,13 +244,29 @@ function createRecognizedFoods(today = DEMO_TODAY) {
       category: CATEGORIES.FRUIT_VEG,
       categoryLabel: "蔬果",
       zone: "保鲜抽屉",
-      freshness: 61,
-      purchaseDay: -5,
-      expiryDay: 1,
+      freshness: 84,
+      purchaseDay: -2,
+      expiryDay: 5,
       image: "assets/foods/blueberry.jpg",
+      bbox: { left: 70, top: 44, width: 20, height: 18 },
       storageTip: "食用前再清洗，避免受潮发霉。",
-      action: "明天前吃完或做奶昔。",
+      action: "状态新鲜，适合做酸奶杯。",
       accent: "blue",
+    },
+    {
+      id: "orangeJuice",
+      name: "橙汁",
+      category: CATEGORIES.DRINK,
+      categoryLabel: "饮品",
+      zone: "门架",
+      freshness: 64,
+      purchaseDay: -4,
+      expiryDay: 2,
+      image: "assets/foods/orange-juice.jpg",
+      bbox: { left: 76, top: 20, width: 17, height: 25 },
+      storageTip: "开封后冷藏，饮用前轻摇。",
+      action: "2 天内喝完，适合搭配早餐或酸奶饮。",
+      accent: "orange",
     },
   ];
 
@@ -205,9 +291,18 @@ function countUrgentReminders(foods) {
       reminder === "expired" ||
       reminder === "expires-today" ||
       reminder === "expires-tomorrow" ||
+      reminder === "expires-soon" ||
       reminder === "low-freshness"
     ));
   }).length;
+}
+
+function getReminderGroups(foods) {
+  return {
+    today: foods.filter((food) => food.remainingDays === 0),
+    soon: foods.filter((food) => food.remainingDays > 0 && food.remainingDays <= 3),
+    expired: foods.filter((food) => food.remainingDays < 0),
+  };
 }
 
 const STATE_LABELS = {
@@ -251,10 +346,22 @@ function getReminderText(reminder) {
     expired: "已过期",
     "expires-today": "今天到期",
     "expires-tomorrow": "明天到期",
+    "expires-soon": "3天内到期",
     "low-freshness": "新鲜度偏低",
   };
 
   return text[reminder] || "提醒";
+}
+
+function getRecipeRecommendations(foods) {
+  const foodById = new Map(foods.map((food) => [food.id, food]));
+
+  return RECIPE_DEFINITIONS
+    .filter((recipe) => recipe.ingredientIds.every((id) => foodById.has(id)))
+    .map((recipe) => ({
+      ...recipe,
+      ingredients: recipe.ingredientIds.map((id) => foodById.get(id).name),
+    }));
 }
 
 function escapeHtml(value) {
@@ -303,90 +410,332 @@ function renderFoodCard(food) {
   `;
 }
 
+function renderDetectionBoxes(foods, highlightedFoodId = "") {
+  return foods.map((food) => {
+    const pill = getFreshnessPill(food);
+    const highlight = highlightedFoodId === food.id ? " is-highlighted" : "";
+
+    return `
+      <div
+        class="detection-box detection-${pill.tone}${highlight}"
+        style="--box-left:${food.bbox.left}%;--box-top:${food.bbox.top}%;--box-width:${food.bbox.width}%;--box-height:${food.bbox.height}%;"
+        aria-label="${escapeHtml(food.name)} ${pill.label}"
+      >
+        <span class="detection-label">${escapeHtml(food.name)} ${pill.label}</span>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderDetectionOverlay(foods, highlightedFoodId = "") {
+  if (!foods.length) {
+    return "";
+  }
+
+  return `
+    <div class="detection-layer" aria-hidden="true">
+      ${renderDetectionBoxes(foods, highlightedFoodId)}
+    </div>
+  `;
+}
+
+function renderScanCard(state) {
+  const foods = state.scanned ? state.foods : [];
+  const scanStatus = state.scanned ? `AI 已识别 ${foods.length} 个食材` : "等待冰箱拍照";
+  const urgentCount = state.scanned ? countUrgentReminders(foods) : 0;
+
+  return `
+    <section class="scan-card" aria-label="冰箱识别摘要">
+      <div class="scan-hero-media">
+        <img src="assets/fridge-hero.png" alt="冰箱内新鲜食材照片" />
+        ${state.scanned ? renderDetectionOverlay(foods, state.highlightedFoodId) : ""}
+        <div class="scan-overlay">
+          <span>${scanStatus}</span>
+          <strong>${foods.length} 个食材</strong>
+        </div>
+      </div>
+      <div class="summary-strip">
+        <div>
+          <span>临期提醒</span>
+          <strong>${urgentCount} 个</strong>
+        </div>
+        <button class="primary-action" id="scanButton" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.2l1.2-2h6.2l1.2 2h1.2A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-8Z" />
+            <path d="M12 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
+          </svg>
+          拍照识别
+        </button>
+      </div>
+    </section>
+  `;
+}
+
+function renderCategoryTabs(activeCategory) {
+  return Object.keys(CATEGORY_LABELS).map((category) => {
+    const active = activeCategory === category ? "is-active" : "";
+    return `<button class="${active}" type="button" data-category="${category}">${CATEGORY_LABELS[category]}</button>`;
+  }).join("");
+}
+
+function renderEmptyState(title, body) {
+  return `
+    <div class="empty-state">
+      <strong>${escapeHtml(title)}</strong>
+      <span>${escapeHtml(body)}</span>
+    </div>
+  `;
+}
+
+function renderInventoryList(foods, scanned, activeCategory) {
+  if (!scanned) {
+    return renderEmptyState("先拍一张冰箱照片", "Demo 会模拟大模型识别，并生成食材新鲜度与过期提醒。");
+  }
+
+  const filteredFoods = filterFoodsByCategory(foods, activeCategory);
+
+  if (!filteredFoods.length) {
+    return renderEmptyState("这个分类暂时没有食材", "换一个分类，或者重新扫描冰箱。");
+  }
+
+  return `<div class="inventory-list">${filteredFoods.map(renderFoodCard).join("")}</div>`;
+}
+
+function renderReminderPreview(foods, scanned) {
+  if (!scanned) {
+    return `<p class="muted-line">扫描后会自动生成临期提醒。</p>`;
+  }
+
+  const urgentFoods = foods.filter((food) => food.reminders.length > 0);
+
+  if (!urgentFoods.length) {
+    return `<p class="muted-line">暂无提醒。</p>`;
+  }
+
+  return `
+    <div class="reminder-list">
+      ${urgentFoods.slice(0, 5).map((food) => `
+        <button class="reminder-item" type="button" data-food-id="${food.id}">
+          <span>${escapeHtml(food.name)}</span>
+          <small>${food.reminders.map(getReminderText).join(" / ")}</small>
+        </button>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderMiniFoodRow(food) {
+  const pill = getFreshnessPill(food);
+
+  return `
+    <button class="alert-food-row" type="button" data-food-id="${food.id}">
+      ${renderFoodPhoto(food)}
+      <span class="alert-food-main">
+        <strong>${escapeHtml(food.name)}</strong>
+        <small>${escapeHtml(food.categoryLabel)} · ${formatRemainingDays(food.remainingDays)}</small>
+      </span>
+      <span class="state-pill pill-${pill.tone}">${pill.label}</span>
+    </button>
+  `;
+}
+
+function renderReminderGroup(title, foods, emptyText) {
+  return `
+    <section class="section-block">
+      <div class="section-title-row">
+        <h2>${escapeHtml(title)}</h2>
+        <span>${foods.length} 个</span>
+      </div>
+      ${foods.length ? `<div class="alert-food-list">${foods.map(renderMiniFoodRow).join("")}</div>` : `<p class="muted-line">${escapeHtml(emptyText)}</p>`}
+    </section>
+  `;
+}
+
+function renderPageHeader(title, subtitle) {
+  return `
+    <div class="page-header">
+      <h2>${escapeHtml(title)}</h2>
+      <p>${escapeHtml(subtitle)}</p>
+    </div>
+  `;
+}
+
+function renderInventoryPage(state) {
+  return `
+    <div class="page-view" data-page="inventory">
+      ${renderScanCard(state)}
+      <section class="section-block" aria-labelledby="category-title">
+        <div class="section-title-row">
+          <h2 id="category-title">食材分类</h2>
+          <span>本地模拟识别</span>
+        </div>
+        <div class="category-tabs" aria-label="食材分类筛选">${renderCategoryTabs(state.activeCategory)}</div>
+      </section>
+      <section class="section-block inventory-section" aria-labelledby="inventory-title">
+        <div class="section-title-row">
+          <h2 id="inventory-title">冰箱库存</h2>
+          <span>新鲜度 / 到期日</span>
+        </div>
+        ${renderInventoryList(state.foods, state.scanned, state.activeCategory)}
+      </section>
+      <section class="section-block reminder-section" aria-labelledby="reminder-title">
+        <div class="section-title-row">
+          <h2 id="reminder-title">过期提醒</h2>
+          <span>3 天内</span>
+        </div>
+        ${renderReminderPreview(state.foods, state.scanned)}
+      </section>
+    </div>
+  `;
+}
+
+function renderRemindersPage(state) {
+  const groups = getReminderGroups(state.scanned ? state.foods : []);
+
+  return `
+    <div class="page-view" data-page="reminders">
+      ${renderPageHeader("过期提醒", "按到期时间整理需要优先处理的食材。")}
+      ${renderReminderGroup("今天到期", groups.today, "暂无今天到期食材")}
+      ${renderReminderGroup("1–3 天内到期", groups.soon, "暂无 1–3 天内到期食材")}
+      ${renderReminderGroup("已过期", groups.expired, "暂无已过期食材")}
+    </div>
+  `;
+}
+
+function renderScanPage(state) {
+  const count = state.scanned ? state.foods.length : 0;
+
+  return `
+    <div class="page-view" data-page="scan">
+      ${renderScanCard(state)}
+      <section class="section-block scan-action-card">
+        <div class="section-title-row">
+          <h2>拍照识别</h2>
+          <span>已识别 ${count} 个</span>
+        </div>
+        <p class="muted-line">Demo 会模拟大模型识别冰箱照片，并生成食材新鲜度、到期状态和过期提醒。</p>
+        <button class="wide-action" id="scanPageButton" type="button">开始识别</button>
+      </section>
+    </div>
+  `;
+}
+
+function renderRecipesPage(state) {
+  const recipes = getRecipeRecommendations(state.scanned ? state.foods : []);
+
+  return `
+    <div class="page-view" data-page="recipes">
+      ${renderPageHeader("库存菜谱", "根据当前冰箱食材生成的本地推荐。")}
+      ${recipes.length ? `
+        <div class="recipe-grid">
+          ${recipes.map((recipe) => `
+            <article class="recipe-card">
+              <h3>${escapeHtml(recipe.name)}</h3>
+              <p>${recipe.ingredients.map(escapeHtml).join(" · ")}</p>
+              <strong>${escapeHtml(recipe.reason)}</strong>
+              <ol>
+                ${recipe.steps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}
+              </ol>
+            </article>
+          `).join("")}
+        </div>
+      ` : renderEmptyState("暂无菜谱推荐", "拍照识别后会根据库存生成推荐菜谱。")}
+    </div>
+  `;
+}
+
+function renderProfilePage(state) {
+  const foods = state.scanned ? state.foods : [];
+  const stats = [
+    ["用户", "Jennifer"],
+    ["设备", "智能冰箱 Demo"],
+    ["今日识别食材数", `${foods.length} 个`],
+    ["临期提醒数", `${countUrgentReminders(foods)} 个`],
+    ["App 版本", "1.0 Demo"],
+    ["数据模式", "本地模拟数据"],
+  ];
+
+  return `
+    <div class="page-view" data-page="profile">
+      ${renderPageHeader("我的", "设备、统计和 Demo 数据状态。")}
+      <div class="profile-grid">
+        ${stats.map(([label, value]) => `
+          <section class="profile-stat">
+            <span>${escapeHtml(label)}</span>
+            <strong>${escapeHtml(value)}</strong>
+          </section>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderPageContent(pageId, state) {
+  const normalizedState = {
+    foods: state.foods || [],
+    scanned: Boolean(state.scanned),
+    activeCategory: state.activeCategory || CATEGORIES.ALL,
+    highlightedFoodId: state.highlightedFoodId || "",
+  };
+
+  if (pageId === "reminders") {
+    return renderRemindersPage(normalizedState);
+  }
+  if (pageId === "scan") {
+    return renderScanPage(normalizedState);
+  }
+  if (pageId === "recipes") {
+    return renderRecipesPage(normalizedState);
+  }
+  if (pageId === "profile") {
+    return renderProfilePage(normalizedState);
+  }
+  return renderInventoryPage(normalizedState);
+}
+
+function renderNavItems(activePage) {
+  return NAV_ITEMS.map((item) => {
+    const active = activePage === item.id ? " is-active" : "";
+    const className = item.id === "scan" ? `camera-fab${active}` : `nav-item${active}`;
+
+    return `
+      <button class="${className}" type="button" data-nav="${item.id}" aria-label="${item.label}">
+        <svg viewBox="0 0 24 24" aria-hidden="true">${item.icon}</svg>
+        <span>${item.label}</span>
+      </button>
+    `;
+  }).join("");
+}
+
 if (typeof document !== "undefined") {
   const appState = {
     foods: [],
     activeCategory: CATEGORIES.ALL,
+    activePage: "inventory",
+    highlightedFoodId: "",
     scanned: false,
     scanTimer: 0,
+    highlightTimer: 0,
   };
 
-  const elements = {};
-
   function getElement(id) {
-    elements[id] = elements[id] || document.getElementById(id);
-    return elements[id];
+    return document.getElementById(id);
   }
 
-  function renderSummary() {
-    const recognizedCount = getElement("recognizedCount");
-    const urgentCount = getElement("urgentCount");
-    const scanStatus = getElement("scanStatus");
-
-    recognizedCount.textContent = String(appState.foods.length);
-    urgentCount.textContent = String(countUrgentReminders(appState.foods));
-    scanStatus.textContent = appState.scanned ? "AI 已识别 8 个食材" : "等待冰箱拍照";
-  }
-
-  function renderCategoryTabs() {
-    const categoryTabs = getElement("categoryTabs");
-    categoryTabs.innerHTML = Object.keys(CATEGORY_LABELS).map((category) => {
-      const active = appState.activeCategory === category ? "is-active" : "";
-      return `<button class="${active}" type="button" data-category="${category}">${CATEGORY_LABELS[category]}</button>`;
-    }).join("");
-  }
-
-  function renderInventory() {
-    const inventoryList = getElement("inventoryList");
-    const emptyState = getElement("emptyState");
-    const filteredFoods = filterFoodsByCategory(appState.foods, appState.activeCategory);
-
-    emptyState.hidden = appState.scanned && filteredFoods.length > 0;
-
-    if (!appState.scanned) {
-      inventoryList.innerHTML = "";
-      emptyState.innerHTML = `
-        <strong>先拍一张冰箱照片</strong>
-        <span>Demo 会模拟大模型识别，并生成食材新鲜度与过期提醒。</span>
-      `;
+  function renderSheetDetectionLayer() {
+    const sheetDetectionLayer = getElement("sheetDetectionLayer");
+    if (!sheetDetectionLayer) {
       return;
     }
-
-    if (filteredFoods.length === 0) {
-      inventoryList.innerHTML = "";
-      emptyState.hidden = false;
-      emptyState.innerHTML = `
-        <strong>这个分类暂时没有食材</strong>
-        <span>换一个分类，或者重新扫描冰箱。</span>
-      `;
-      return;
-    }
-
-    inventoryList.innerHTML = filteredFoods.map(renderFoodCard).join("");
-  }
-
-  function renderReminders() {
-    const reminderList = getElement("reminderList");
-    const urgentFoods = appState.foods.filter((food) => food.reminders.length > 0);
-
-    if (!appState.scanned) {
-      reminderList.innerHTML = `<p class="muted-line">扫描后会自动生成临期提醒。</p>`;
-      return;
-    }
-
-    reminderList.innerHTML = urgentFoods.slice(0, 5).map((food) => `
-      <button class="reminder-item" type="button" data-food-id="${food.id}">
-        <span>${food.name}</span>
-        <small>${food.reminders.map(getReminderText).join(" / ")}</small>
-      </button>
-    `).join("");
+    sheetDetectionLayer.innerHTML = appState.scanned
+      ? renderDetectionBoxes(appState.foods, appState.highlightedFoodId)
+      : "";
   }
 
   function renderApp() {
-    renderSummary();
-    renderCategoryTabs();
-    renderInventory();
-    renderReminders();
+    getElement("pageContent").innerHTML = renderPageContent(appState.activePage, appState);
+    getElement("bottomNav").innerHTML = renderNavItems(appState.activePage);
+    renderSheetDetectionLayer();
   }
 
   function openDetail(foodId) {
@@ -400,12 +749,20 @@ if (typeof document !== "undefined") {
 
     const pill = getFreshnessPill(food);
 
+    clearTimeout(appState.highlightTimer);
+    appState.highlightedFoodId = food.id;
+    renderApp();
+    appState.highlightTimer = window.setTimeout(() => {
+      appState.highlightedFoodId = "";
+      renderApp();
+    }, 1000);
+
     detailContent.innerHTML = `
       <div class="detail-heading">
         ${renderFoodPhoto(food)}
         <div>
-          <h2>${food.name}</h2>
-          <p>${food.categoryLabel} · ${food.zone}</p>
+          <h2>${escapeHtml(food.name)}</h2>
+          <p>${escapeHtml(food.categoryLabel)} · ${escapeHtml(food.zone)}</p>
         </div>
         <span class="state-pill pill-${pill.tone}">${pill.label}</span>
       </div>
@@ -419,8 +776,8 @@ if (typeof document !== "undefined") {
         <div><dt>购入</dt><dd>${Math.abs(food.purchaseDay)} 天前</dd></div>
         <div><dt>提醒</dt><dd>${food.reminders.length ? food.reminders.map(getReminderText).join(" / ") : "暂无"}</dd></div>
       </dl>
-      <p class="detail-tip"><b>建议：</b>${food.action}</p>
-      <p class="detail-tip"><b>存放：</b>${food.storageTip}</p>
+      <p class="detail-tip"><b>建议：</b>${escapeHtml(food.action)}</p>
+      <p class="detail-tip"><b>存放：</b>${escapeHtml(food.storageTip)}</p>
     `;
 
     detailSheet.classList.add("is-open");
@@ -435,6 +792,7 @@ if (typeof document !== "undefined") {
 
   function openScanSheet() {
     const scanSheet = getElement("scanSheet");
+    renderSheetDetectionLayer();
     scanSheet.classList.add("is-open");
     scanSheet.setAttribute("aria-hidden", "false");
   }
@@ -453,7 +811,7 @@ if (typeof document !== "undefined") {
 
     clearTimeout(appState.scanTimer);
     startScan.disabled = true;
-    scanProgress.textContent = "正在分析肉蛋奶、蔬果和冷冻区...";
+    scanProgress.textContent = "正在分析肉蛋奶、蔬果、饮品和冷冻区...";
 
     appState.scanTimer = window.setTimeout(() => {
       appState.foods = createRecognizedFoods();
@@ -467,35 +825,50 @@ if (typeof document !== "undefined") {
     }, 850);
   }
 
-  function handleListAction(event) {
-    const target = event.target.closest("[data-food-id]");
-    if (!target) {
+  function handlePageClick(event) {
+    const scanTrigger = event.target.closest("#scanButton, #scanPageButton");
+    if (scanTrigger) {
+      openScanSheet();
       return;
     }
-    openDetail(target.dataset.foodId);
+
+    const categoryTarget = event.target.closest("[data-category]");
+    if (categoryTarget) {
+      appState.activeCategory = categoryTarget.dataset.category;
+      renderApp();
+      return;
+    }
+
+    const foodTarget = event.target.closest("[data-food-id]");
+    if (foodTarget) {
+      openDetail(foodTarget.dataset.foodId);
+    }
+  }
+
+  function handleNavClick(event) {
+    const navTarget = event.target.closest("[data-nav]");
+    if (!navTarget) {
+      return;
+    }
+    appState.activePage = navTarget.dataset.nav;
+    renderApp();
   }
 
   function initApp() {
-    getElement("scanButton").addEventListener("click", openScanSheet);
+    getElement("pageContent").addEventListener("click", handlePageClick);
+    getElement("bottomNav").addEventListener("click", handleNavClick);
     getElement("closeScan").addEventListener("click", closeScanSheet);
     getElement("startScan").addEventListener("click", startScanSimulation);
     getElement("closeDetail").addEventListener("click", closeDetail);
-    getElement("inventoryList").addEventListener("click", handleListAction);
-    getElement("reminderList").addEventListener("click", handleListAction);
 
-    getElement("inventoryList").addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        handleListAction(event);
-      }
-    });
-
-    getElement("categoryTabs").addEventListener("click", (event) => {
-      const target = event.target.closest("[data-category]");
-      if (!target) {
+    getElement("pageContent").addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") {
         return;
       }
-      appState.activeCategory = target.dataset.category;
-      renderApp();
+      const foodTarget = event.target.closest("[data-food-id]");
+      if (foodTarget) {
+        openDetail(foodTarget.dataset.foodId);
+      }
     });
 
     renderApp();
@@ -509,14 +882,20 @@ if (typeof module !== "undefined") {
     CATEGORIES,
     CATEGORY_LABELS,
     DEMO_TODAY,
+    NAV_ITEMS,
     createRecognizedFoods,
     calculateRemainingDays,
     evaluateFreshnessState,
     getReminderFlags,
     filterFoodsByCategory,
     countUrgentReminders,
+    getReminderGroups,
+    getRecipeRecommendations,
     formatRemainingDays,
     getFreshnessPill,
+    renderDetectionOverlay,
     renderFoodCard,
+    renderNavItems,
+    renderPageContent,
   };
 }
