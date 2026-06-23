@@ -79,6 +79,7 @@ function createRecognizedFoods(today = DEMO_TODAY) {
       freshness: 86,
       purchaseDay: -2,
       expiryDay: 3,
+      image: "assets/foods/beef.jpg",
       storageTip: "密封冷藏，建议分装后靠内侧存放。",
       action: "3 天内适合煎炒或炖煮。",
       accent: "red",
@@ -92,6 +93,7 @@ function createRecognizedFoods(today = DEMO_TODAY) {
       freshness: 68,
       purchaseDay: -8,
       expiryDay: 1,
+      image: "assets/foods/eggs.jpg",
       storageTip: "保留原包装，避免靠近冰箱门反复升温。",
       action: "明天到期，优先做早餐或烘焙。",
       accent: "amber",
@@ -105,6 +107,7 @@ function createRecognizedFoods(today = DEMO_TODAY) {
       freshness: 52,
       purchaseDay: -5,
       expiryDay: 0,
+      image: "assets/foods/milk.jpg",
       storageTip: "开封后尽量放在冷藏室深处。",
       action: "今天喝完，适合搭配早餐。",
       accent: "blue",
@@ -118,6 +121,7 @@ function createRecognizedFoods(today = DEMO_TODAY) {
       freshness: 74,
       purchaseDay: -3,
       expiryDay: 2,
+      image: "assets/foods/tomato.jpg",
       storageTip: "保持干燥，避免与叶菜挤压。",
       action: "2 天内做沙拉或炒蛋。",
       accent: "red",
@@ -131,6 +135,7 @@ function createRecognizedFoods(today = DEMO_TODAY) {
       freshness: 39,
       purchaseDay: -4,
       expiryDay: 0,
+      image: "assets/foods/lettuce.jpg",
       storageTip: "用厨房纸吸水后装袋冷藏。",
       action: "今天处理，变软叶片先挑出。",
       accent: "green",
@@ -144,6 +149,7 @@ function createRecognizedFoods(today = DEMO_TODAY) {
       freshness: 35,
       purchaseDay: -10,
       expiryDay: -1,
+      image: "assets/foods/yogurt.jpg",
       storageTip: "已过期，不建议继续食用。",
       action: "移出冰箱并丢弃。",
       accent: "purple",
@@ -157,6 +163,7 @@ function createRecognizedFoods(today = DEMO_TODAY) {
       freshness: 79,
       purchaseDay: -7,
       expiryDay: 5,
+      image: "assets/foods/chicken.jpg",
       storageTip: "冷冻分装，解冻后不要再次冷冻。",
       action: "适合安排本周健身餐。",
       accent: "red",
@@ -170,6 +177,7 @@ function createRecognizedFoods(today = DEMO_TODAY) {
       freshness: 61,
       purchaseDay: -5,
       expiryDay: 1,
+      image: "assets/foods/blueberry.jpg",
       storageTip: "食用前再清洗，避免受潮发霉。",
       action: "明天前吃完或做奶昔。",
       accent: "blue",
@@ -249,6 +257,52 @@ function getReminderText(reminder) {
   return text[reminder] || "提醒";
 }
 
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function renderFoodPhoto(food) {
+  const image = escapeHtml(food.image || "");
+  const name = escapeHtml(food.name);
+  const initial = escapeHtml(food.name.slice(0, 1));
+
+  return `
+    <div class="food-photo">
+      <img class="food-thumb" src="${image}" alt="${name}照片" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false;" />
+      <span class="food-thumb-fallback" hidden>${initial}</span>
+    </div>
+  `;
+}
+
+function renderFoodCard(food) {
+  const pill = getFreshnessPill(food);
+  const name = escapeHtml(food.name);
+
+  return `
+    <article class="food-card state-${food.state} freshness-${pill.tone}" data-food-id="${food.id}" tabindex="0" role="button" aria-label="查看 ${name} 详情">
+      ${renderFoodPhoto(food)}
+      <div class="food-main">
+        <div class="food-title-row">
+          <h3>${name}</h3>
+          <span class="state-pill pill-${pill.tone}">${pill.label}</span>
+        </div>
+        <p>${escapeHtml(food.categoryLabel)} · ${escapeHtml(food.zone)}</p>
+        <div class="freshness-line">
+          <span><b>${food.freshness}%</b> 新鲜度</span>
+          <span>${formatRemainingDays(food.remainingDays)}</span>
+        </div>
+        <div class="freshness-track" aria-hidden="true">
+          <i style="width:${food.freshness}%"></i>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
 if (typeof document !== "undefined") {
   const appState = {
     foods: [],
@@ -308,29 +362,7 @@ if (typeof document !== "undefined") {
       return;
     }
 
-    inventoryList.innerHTML = filteredFoods.map((food) => {
-      const pill = getFreshnessPill(food);
-
-      return `
-        <article class="food-card state-${food.state} freshness-${pill.tone}" data-food-id="${food.id}" tabindex="0" role="button" aria-label="查看 ${food.name} 详情">
-          <div class="food-icon accent-${food.accent}" aria-hidden="true">${food.name.slice(0, 1)}</div>
-          <div class="food-main">
-            <div class="food-title-row">
-              <h3>${food.name}</h3>
-              <span class="state-pill pill-${pill.tone}">${pill.label}</span>
-            </div>
-            <p>${food.categoryLabel} · ${food.zone}</p>
-            <div class="freshness-line">
-              <span><b>${food.freshness}%</b> 新鲜度</span>
-              <span>${formatRemainingDays(food.remainingDays)}</span>
-            </div>
-            <div class="freshness-track" aria-hidden="true">
-              <i style="width:${food.freshness}%"></i>
-            </div>
-          </div>
-        </article>
-      `;
-    }).join("");
+    inventoryList.innerHTML = filteredFoods.map(renderFoodCard).join("");
   }
 
   function renderReminders() {
@@ -370,7 +402,7 @@ if (typeof document !== "undefined") {
 
     detailContent.innerHTML = `
       <div class="detail-heading">
-        <div class="food-icon accent-${food.accent}" aria-hidden="true">${food.name.slice(0, 1)}</div>
+        ${renderFoodPhoto(food)}
         <div>
           <h2>${food.name}</h2>
           <p>${food.categoryLabel} · ${food.zone}</p>
@@ -485,5 +517,6 @@ if (typeof module !== "undefined") {
     countUrgentReminders,
     formatRemainingDays,
     getFreshnessPill,
+    renderFoodCard,
   };
 }
