@@ -42,6 +42,30 @@ for (const selector of [".detection-layer", ".detection-box", ".page-view", ".re
   assert(css.includes(selector), `Missing visual style for ${selector}`);
 }
 
+assert(
+  css.includes("padding-top: calc(env(safe-area-inset-top, 0px) + 28px);"),
+  "App header should reserve safe-area top padding"
+);
+assert(
+  css.includes("height: clamp(260px, 48vw, 340px);"),
+  "Hero image area should use responsive clamp height"
+);
+assert(css.includes(".round-button:active"), "Settings button should have a lightweight pressed state");
+assert(css.includes("stroke-width: 1.75"), "Settings icon should use a thin line weight");
+
+const bottomNavBlock = css.match(/\.bottom-nav\s*\{[\s\S]*?\n\}/);
+assert(bottomNavBlock, "Missing bottom nav CSS block");
+assert(bottomNavBlock[0].includes("display: flex;"), "Bottom nav should use flex layout");
+assert(bottomNavBlock[0].includes("align-items: center;"), "Bottom nav items should be vertically centered");
+assert(bottomNavBlock[0].includes("justify-content: space-around;"), "Bottom nav should distribute all five items evenly");
+assert(bottomNavBlock[0].includes("height: 64px;"), "Bottom nav should use the requested 64px height");
+
+assert(!css.includes("grid-template-columns: 1fr 1fr 64px 1fr 1fr"), "Bottom nav should not reserve a raised center column");
+
+const cameraFabBlock = css.match(/\.camera-fab\s*\{[\s\S]*?\n\}/);
+assert(cameraFabBlock, "Missing camera nav CSS block");
+assert(!cameraFabBlock[0].includes("transform:"), "Bottom nav camera item should not be raised with transform");
+
 for (const forbidden of ["--terracotta", "--ochre", "--amber", "--blue", "--line", "#f97316", "#c66b3d"]) {
   assert(!css.includes(forbidden), `Forbidden legacy accent remains: ${forbidden}`);
 }
@@ -64,6 +88,7 @@ const allowedRadiusValues = new Set([
   "var(--r-pill)",
   "inherit",
   "0",
+  "6px",
   "var(--r-card) var(--r-card) 0 0",
 ]);
 
