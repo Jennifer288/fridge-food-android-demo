@@ -202,7 +202,7 @@ const FOODS = [
     purchaseDay: -4,
     daysLeft: 2,
     image: "assets/foods/orange-juice.jpg",
-    hero: { x: 0.84, y: 0.55, w: 0.065, h: 0.29 },
+    hero: { x: 0.915, y: 0.56, w: 0.055, h: 0.34 },
     storageTip: "开封后冷藏，饮用前轻摇。",
     action: "2 天内喝完，适合搭配早餐或酸奶饮。",
   },

@@ -94,6 +94,7 @@ assert(detectionBoxBlock[0].includes("box-shadow: none;"), "Detection boxes shou
 assert(css.includes(".scan-beam"), "Scan beam overlay should be styled");
 assert(css.includes("white-space: nowrap;"), "AI recognized copy should keep its reading order on one natural line");
 assert(css.includes("line-height: 1.25;"), "AI recognized copy should have compact app-like line height");
+assert(css.includes('.hero-detection-box[data-food-id="orangeJuice"] .bbox-label'), "Orange juice label should be repositioned to avoid right-edge clipping");
 assert(css.includes("animation: scanSweep 1100ms ease-in-out forwards;"), "Scan beam should sweep for about 1100ms");
 assert(css.includes("animation-delay: var(--box-delay);"), "Detection boxes should use stagger delay");
 assert(css.includes("transition: width 700ms cubic-bezier(.22,.61,.36,1);"), "Freshness bars should animate width");

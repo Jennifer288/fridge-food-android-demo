@@ -1052,6 +1052,16 @@ p {
   border-top: 4px solid var(--detect-color);
 }
 
+.hero-detection-box[data-food-id="orangeJuice"] .bbox-label {
+  left: auto;
+  right: -2px;
+}
+
+.hero-detection-box[data-food-id="orangeJuice"] .bbox-label::after {
+  left: auto;
+  right: 10px;
+}
+
 .live-dot {
   display: inline-block;
   width: 8px;
