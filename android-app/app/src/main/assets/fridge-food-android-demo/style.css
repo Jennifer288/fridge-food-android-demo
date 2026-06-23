@@ -173,7 +173,7 @@ p {
   position: relative;
   overflow: hidden;
   height: clamp(260px, 48vw, 340px);
-  background: #E8EEEC url("assets/fridge-hero.png") center / cover no-repeat;
+  background: #E8EEEC url("assets/fridge-hero.png") center / 100% 100% no-repeat;
 }
 
 .scan-hero-media::after {
@@ -197,7 +197,7 @@ p {
   background:
     radial-gradient(ellipse at 50% 6%, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0) 30%),
     linear-gradient(90deg, rgba(10, 24, 34, 0.16), rgba(255, 255, 255, 0.05) 16%, rgba(255, 255, 255, 0.05) 84%, rgba(10, 24, 34, 0.16)),
-    url("assets/fridge-hero.png") center / cover no-repeat;
+    url("assets/fridge-hero.png") center / 100% 100% no-repeat;
   box-shadow:
     inset 0 18px 42px rgba(255, 255, 255, 0.38),
     inset 0 -34px 50px rgba(10, 24, 34, 0.18),
@@ -248,16 +248,11 @@ p {
   top: 72%;
 }
 
-.hero-scene-layer,
 .detection-layer,
 .sheet-detection-root {
   position: absolute;
   inset: 0;
   pointer-events: none;
-}
-
-.hero-scene-layer {
-  z-index: 2;
 }
 
 .detection-layer,
@@ -267,19 +262,6 @@ p {
 
 .detection-layer.is-calibrating {
   pointer-events: auto;
-}
-
-.hero-food-scene-item {
-  position: absolute;
-  left: var(--hero-left);
-  top: var(--hero-top);
-  width: var(--hero-width);
-  height: var(--hero-height);
-  pointer-events: none;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  overflow: visible;
 }
 
 .hero-detection-box {
@@ -316,21 +298,6 @@ p {
 .detection-expire {
   --detect-color: var(--expire-fg);
   --detect-bg: var(--expire-bg);
-}
-
-.hero-food-img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.22)) saturate(1.04) contrast(1.02);
-  mix-blend-mode: multiply;
-  -webkit-mask-image: radial-gradient(ellipse at center, #000 58%, rgba(0, 0, 0, 0.82) 70%, transparent 92%);
-  mask-image: radial-gradient(ellipse at center, #000 58%, rgba(0, 0, 0, 0.82) 70%, transparent 92%);
-  object-fit: contain;
 }
 
 .bbox-label {

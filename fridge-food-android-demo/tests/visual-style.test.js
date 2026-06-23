@@ -38,7 +38,7 @@ for (const navId of ["inventory", "reminders", "scan", "recipes", "profile"]) {
   assert(html.includes(`data-nav="${navId}"`), `Missing bottom nav button for ${navId}`);
 }
 
-for (const selector of [".hero-scene-layer", ".detection-layer", ".hero-food-scene-item", ".hero-detection-box", ".hero-food-img", ".bbox-label", ".fridge-stage-bg", ".page-view", ".recipe-card", ".profile-stat"]) {
+for (const selector of [".detection-layer", ".hero-detection-box", ".bbox-label", ".fridge-stage-bg", ".page-view", ".recipe-card", ".profile-stat"]) {
   assert(css.includes(selector), `Missing visual style for ${selector}`);
 }
 
@@ -80,11 +80,8 @@ assert(!labelBlock[0].includes("text-overflow"), "Hero label should not use text
 assert(!labelBlock[0].includes("ellipsis"), "Hero label should not ellipsize text");
 assert(labelBlock[0].includes("white-space: normal;"), "Hero label should be allowed to wrap when needed");
 
-const sceneItemBlock = css.match(/\.hero-food-scene-item\s*\{[\s\S]*?\n\}/);
-assert(sceneItemBlock, "Missing hero scene item CSS block");
-assert(sceneItemBlock[0].includes("background: transparent;"), "Hero food images should sit directly in the fridge scene");
-assert(sceneItemBlock[0].includes("border: none;"), "Hero food scene items should not look like bordered cards");
-assert(sceneItemBlock[0].includes("box-shadow: none;"), "Hero food scene items should not use card shadows");
+assert(!css.includes(".hero-food-scene-item"), "Hero should not style an extra food image positioning layer");
+assert(!css.includes(".hero-food-img"), "Hero should not style extra food images");
 
 const detectionBoxBlock = css.match(/\.hero-detection-box\s*\{[\s\S]*?\n\}/);
 assert(detectionBoxBlock, "Missing hero detection box CSS block");
