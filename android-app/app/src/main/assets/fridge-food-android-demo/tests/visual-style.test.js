@@ -53,6 +53,8 @@ assert(
 assert(css.includes('url("assets/fridge-hero.png")'), "Hero should use the real fridge interior image as its background");
 assert(css.includes(".round-button:active"), "Settings button should have a lightweight pressed state");
 assert(css.includes("stroke-width: 1.75"), "Settings icon should use a thin line weight");
+assert(css.includes("backdrop-filter: blur(10px);"), "Settings button should have a refined frosted surface");
+assert(css.includes("box-shadow: 0 8px 22px rgba(26, 29, 26, 0.10), 0 1px 2px rgba(26, 29, 26, 0.06);"), "Settings button should use a softer modern shadow");
 assert(css.includes("@media (prefers-reduced-motion: reduce)"), "Reduced motion guard should be present");
 assert(css.includes("animation: none !important;"), "Reduced motion should disable animations");
 assert(css.includes("transition: none !important;"), "Reduced motion should disable transitions");
@@ -90,6 +92,8 @@ assert(detectionBoxBlock[0].includes("background: transparent;"), "Detection box
 assert(detectionBoxBlock[0].includes("box-shadow: none;"), "Detection boxes should stay as overlays instead of raised cards");
 
 assert(css.includes(".scan-beam"), "Scan beam overlay should be styled");
+assert(css.includes("white-space: nowrap;"), "AI recognized copy should keep its reading order on one natural line");
+assert(css.includes("line-height: 1.25;"), "AI recognized copy should have compact app-like line height");
 assert(css.includes("animation: scanSweep 1100ms ease-in-out forwards;"), "Scan beam should sweep for about 1100ms");
 assert(css.includes("animation-delay: var(--box-delay);"), "Detection boxes should use stagger delay");
 assert(css.includes("transition: width 700ms cubic-bezier(.22,.61,.36,1);"), "Freshness bars should animate width");

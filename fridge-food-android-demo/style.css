@@ -130,22 +130,36 @@ p {
 
 .round-button {
   display: inline-grid;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   place-items: center;
   border-radius: var(--r-pill);
-  background: #FFFFFF;
+  background: rgba(255, 255, 255, 0.94);
   color: var(--text-muted);
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 8px 22px rgba(26, 29, 26, 0.10), 0 1px 2px rgba(26, 29, 26, 0.06);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition:
+    background 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.round-button:hover {
+  color: var(--text-strong);
+  box-shadow: 0 10px 24px rgba(26, 29, 26, 0.12), 0 1px 2px rgba(26, 29, 26, 0.06);
+  transform: translateY(-1px);
 }
 
 .round-button:active {
   background: #F1F3F0;
+  transform: scale(.96);
 }
 
 .round-button svg {
-  width: 20px;
-  height: 20px;
+  width: 19px;
+  height: 19px;
   stroke-width: 1.75;
 }
 
@@ -334,16 +348,19 @@ p {
   left: 14px;
   right: 14px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
   color: var(--bg-card);
 }
 
 .scan-overlay span {
-  max-width: 58%;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: calc(100% - 104px);
   font-size: 13px;
   font-weight: 400;
+  line-height: 1.25;
 }
 
 .scan-overlay strong {
@@ -1048,7 +1065,16 @@ p {
 .scan-status {
   display: inline-flex;
   align-items: center;
+  flex-wrap: nowrap;
+  gap: 0;
+  white-space: nowrap;
   max-width: 100%;
+  line-height: 1.25;
+}
+
+.scan-status b {
+  margin: 0 2px;
+  font-variant-numeric: tabular-nums;
 }
 
 .freshness-track,
