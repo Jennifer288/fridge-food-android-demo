@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="description"
+    content="食材保鲜管家 Android 风格 demo：模拟冰箱拍照识别食材、新鲜度评分和过期提醒。"
+  />
+  <title>食材保鲜管家 Demo</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="demo-stage" aria-label="食材保鲜管家 Android App Demo">
+    <section class="phone-shell" aria-label="手机界面预览">
+      <div class="phone-status" aria-label="Android 状态栏">
+        <span>9:41</span>
+        <span class="status-icons" aria-hidden="true">
+          <i></i><i></i><i></i>
+        </span>
+      </div>
+
+      <div class="app-screen">
+        <header class="app-header">
+          <div>
+            <p class="eyebrow">智能冰箱</p>
+            <h1>食材保鲜管家</h1>
+          </div>
+          <button class="round-button" type="button" aria-label="设置">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+              <path d="M19.4 15a7.9 7.9 0 0 0 .1-1l2-1.5-2-3.4-2.4 1a7 7 0 0 0-1.7-1L15 6.5h-4l-.4 2.6c-.6.2-1.2.6-1.7 1l-2.4-1-2 3.4 2 1.5a7.9 7.9 0 0 0 .1 2l-2 1.5 2 3.4 2.4-1c.5.4 1.1.8 1.7 1l.4 2.6h4l.4-2.6c.6-.2 1.2-.6 1.7-1l2.4 1 2-3.4-2.2-1.5Z" />
+            </svg>
+          </button>
+        </header>
+
+        <section class="scan-card" aria-label="冰箱识别摘要">
+          <img src="assets/fridge-demo.png" alt="冰箱食材拍照识别 demo 图" />
+          <div class="scan-overlay">
+            <span id="scanStatus">等待冰箱拍照</span>
+            <strong><span id="recognizedCount">0</span> 个食材</strong>
+          </div>
+          <div class="summary-strip">
+            <div>
+              <span>临期提醒</span>
+              <strong><span id="urgentCount">0</span> 个</strong>
+            </div>
+            <button class="primary-action" id="scanButton" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.2l1.2-2h6.2l1.2 2h1.2A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-8Z" />
+                <path d="M12 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
+              </svg>
+              拍照识别
+            </button>
+          </div>
+        </section>
+
+        <section class="section-block" aria-labelledby="category-title">
+          <div class="section-title-row">
+            <h2 id="category-title">食材分类</h2>
+            <span>肉蛋奶优先显示</span>
+          </div>
+          <div class="category-tabs" id="categoryTabs" aria-label="食材分类筛选"></div>
+        </section>
+
+        <section class="section-block inventory-section" aria-labelledby="inventory-title">
+          <div class="section-title-row">
+            <h2 id="inventory-title">冰箱库存</h2>
+            <span>新鲜度 / 到期日</span>
+          </div>
+          <div class="empty-state" id="emptyState"></div>
+          <div class="inventory-list" id="inventoryList"></div>
+        </section>
+
+        <section class="section-block reminder-section" aria-labelledby="reminder-title">
+          <div class="section-title-row">
+            <h2 id="reminder-title">过期提醒</h2>
+            <span>今天和明天</span>
+          </div>
+          <div class="reminder-list" id="reminderList"></div>
+        </section>
+      </div>
+
+      <nav class="bottom-nav" aria-label="底部导航">
+        <button class="nav-item is-active" type="button" aria-label="库存">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 4h14v16H5V4Z" />
+            <path d="M8 8h8M8 12h8M8 16h5" />
+          </svg>
+          <span>库存</span>
+        </button>
+        <button class="nav-item" type="button" aria-label="提醒">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 10a6 6 0 1 1 12 0v4l2 3H4l2-3v-4Z" />
+            <path d="M10 20h4" />
+          </svg>
+          <span>提醒</span>
+        </button>
+        <button class="camera-fab" id="bottomScanButton" type="button" aria-label="拍照识别">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.2l1.2-2h6.2l1.2 2h1.2A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-8Z" />
+            <path d="M12 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
+          </svg>
+        </button>
+        <button class="nav-item" type="button" aria-label="菜谱">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 4h12v16H6V4Z" />
+            <path d="M9 8h6M9 12h6M9 16h3" />
+          </svg>
+          <span>菜谱</span>
+        </button>
+        <button class="nav-item" type="button" aria-label="我的">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
+            <path d="M4 21a8 8 0 0 1 16 0" />
+          </svg>
+          <span>我的</span>
+        </button>
+      </nav>
+
+      <section class="sheet" id="scanSheet" aria-hidden="true" aria-label="模拟拍照识别面板">
+        <div class="sheet-panel">
+          <div class="sheet-handle" aria-hidden="true"></div>
+          <div class="sheet-header">
+            <h2>冰箱拍照识别</h2>
+            <button class="round-button" id="closeScan" type="button" aria-label="关闭拍照识别">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6 6l12 12M18 6 6 18" />
+              </svg>
+            </button>
+          </div>
+          <div class="scan-preview">
+            <img src="assets/fridge-demo.png" alt="冰箱照片 demo" />
+            <span class="scan-frame" aria-hidden="true"></span>
+          </div>
+          <p id="scanProgress" class="scan-progress">准备识别冰箱照片</p>
+          <button class="wide-action" id="startScan" type="button">开始识别</button>
+        </div>
+      </section>
+
+      <section class="sheet" id="detailSheet" aria-hidden="true" aria-label="食材详情面板">
+        <div class="sheet-panel">
+          <div class="sheet-handle" aria-hidden="true"></div>
+          <div class="sheet-header">
+            <h2>食材详情</h2>
+            <button class="round-button" id="closeDetail" type="button" aria-label="关闭食材详情">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6 6l12 12M18 6 6 18" />
+              </svg>
+            </button>
+          </div>
+          <div id="detailContent"></div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    document.getElementById("bottomScanButton").addEventListener("click", function () {
+      document.getElementById("scanButton").click();
+    });
+  </script>
+</body>
+</html>
