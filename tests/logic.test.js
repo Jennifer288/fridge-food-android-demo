@@ -138,11 +138,13 @@ assert(beefCard.includes("--freshness-width"), "Food card freshness bar should u
 assert(!beefCard.includes("http://") && !beefCard.includes("https://"), "Food card should not render remote images");
 
 const detectionOverlay = renderDetectionOverlay(foods);
-assert.strictEqual((detectionOverlay.match(/class="hero-food-scene-item/g) || []).length, foods.length);
 assert.strictEqual((detectionOverlay.match(/class="hero-detection-box/g) || []).length, foods.length);
-assert.strictEqual((detectionOverlay.match(/class="hero-food-img/g) || []).length, foods.length);
 assert.strictEqual((detectionOverlay.match(/class="bbox-label/g) || []).length, foods.length);
-assert.strictEqual((detectionOverlay.match(/data-food-id=/g) || []).length, foods.length * 2);
+assert.strictEqual((detectionOverlay.match(/data-food-id=/g) || []).length, foods.length);
+assert(!detectionOverlay.includes("<img"), "Hero detection overlay should not render extra food images");
+assert(!detectionOverlay.includes("hero-food-img"), "Hero detection overlay should not render a food image layer");
+assert(!detectionOverlay.includes("hero-food-scene-item"), "Hero detection overlay should not render scene item cards");
+assert(!script.includes("function renderHeroSceneItems("), "Hero should not have a separate food image render function");
 assert(detectionOverlay.includes("牛肉 3天后"));
 assert(detectionOverlay.includes("鸡蛋 新鲜"));
 assert(detectionOverlay.includes("牛奶 到期"));
@@ -151,6 +153,7 @@ assert(detectionOverlay.includes("--hero-left:"));
 assert(detectionOverlay.includes("--box-delay:0ms"), "First detection box should have zero stagger delay");
 assert(detectionOverlay.includes("--box-delay:80ms"), "Detection boxes should include stagger delays");
 assert(!detectionOverlay.includes("..."), "Hero labels should never contain ellipsis text");
+assert(!detectionOverlay.includes("assets/foods/"), "Hero detection overlay should not render food asset images");
 assert(!detectionOverlay.includes("http://") && !detectionOverlay.includes("https://"), "Detection overlay should not render remote images");
 
 const heroFoodIds = [...detectionOverlay.matchAll(/data-food-id="([^"]+)"/g)].map((match) => match[1]);

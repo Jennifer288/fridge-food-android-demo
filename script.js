@@ -90,7 +90,7 @@ const FOODS = [
     purchaseDay: -2,
     daysLeft: 3,
     image: "assets/foods/beef.jpg",
-    hero: { x: 0.08, y: 0.50, w: 0.22, h: 0.17 },
+    hero: { x: 0.63, y: 0.68, w: 0.23, h: 0.14 },
     storageTip: "密封冷藏，建议分装后靠内侧存放。",
     action: "3 天内适合煎炒或炖煮。",
   },
@@ -104,7 +104,7 @@ const FOODS = [
     purchaseDay: -4,
     daysLeft: 6,
     image: "assets/foods/eggs.jpg",
-    hero: { x: 0.24, y: 0.18, w: 0.16, h: 0.18 },
+    hero: { x: 0.77, y: 0.37, w: 0.16, h: 0.13 },
     storageTip: "保留原包装，避免靠近冰箱门反复升温。",
     action: "状态新鲜，适合早餐或烘焙。",
   },
@@ -118,7 +118,7 @@ const FOODS = [
     purchaseDay: -5,
     daysLeft: 0,
     image: "assets/foods/milk.jpg",
-    hero: { x: 0.07, y: 0.15, w: 0.13, h: 0.29 },
+    hero: { x: 0.68, y: 0.08, w: 0.11, h: 0.43 },
     storageTip: "开封后尽量放在冷藏室深处。",
     action: "今天喝完，适合搭配早餐。",
   },
@@ -132,7 +132,7 @@ const FOODS = [
     purchaseDay: -4,
     daysLeft: 1,
     image: "assets/foods/tomato.jpg",
-    hero: { x: 0.56, y: 0.75, w: 0.25, h: 0.17 },
+    hero: { x: 0.25, y: 0.64, w: 0.26, h: 0.17 },
     storageTip: "保持干燥，避免与叶菜挤压。",
     action: "明天前做沙拉或炒蛋。",
   },
@@ -146,7 +146,7 @@ const FOODS = [
     purchaseDay: -4,
     daysLeft: 2,
     image: "assets/foods/lettuce.jpg",
-    hero: { x: 0.10, y: 0.75, w: 0.25, h: 0.17 },
+    hero: { x: 0.20, y: 0.14, w: 0.18, h: 0.33 },
     storageTip: "用厨房纸吸水后装袋冷藏。",
     action: "2 天内处理，变软叶片先挑出。",
   },
@@ -160,7 +160,7 @@ const FOODS = [
     purchaseDay: -10,
     daysLeft: 0,
     image: "assets/foods/yogurt.jpg",
-    hero: { x: 0.46, y: 0.17, w: 0.14, h: 0.21 },
+    hero: { x: 0.50, y: 0.57, w: 0.12, h: 0.24 },
     storageTip: "今天到期，开封后不要继续久放。",
     action: "今天吃完，适合搭配蓝莓。",
   },
@@ -174,7 +174,7 @@ const FOODS = [
     purchaseDay: -12,
     daysLeft: -1,
     image: "assets/foods/chicken.jpg",
-    hero: { x: 0.38, y: 0.50, w: 0.20, h: 0.17 },
+    hero: { x: 0.61, y: 0.67, w: 0.14, h: 0.15 },
     storageTip: "已过期，不建议继续食用。",
     action: "移出冰箱并丢弃。",
   },
@@ -188,7 +188,7 @@ const FOODS = [
     purchaseDay: -2,
     daysLeft: 5,
     image: "assets/foods/blueberry.jpg",
-    hero: { x: 0.72, y: 0.49, w: 0.18, h: 0.18 },
+    hero: { x: 0.37, y: 0.37, w: 0.16, h: 0.14 },
     storageTip: "食用前再清洗，避免受潮发霉。",
     action: "状态新鲜，适合做酸奶杯。",
   },
@@ -202,7 +202,7 @@ const FOODS = [
     purchaseDay: -4,
     daysLeft: 2,
     image: "assets/foods/orange-juice.jpg",
-    hero: { x: 0.76, y: 0.15, w: 0.15, h: 0.30 },
+    hero: { x: 0.92, y: 0.52, w: 0.06, h: 0.38 },
     storageTip: "开封后冷藏，饮用前轻摇。",
     action: "2 天内喝完，适合搭配早餐或酸奶饮。",
   },
@@ -487,23 +487,6 @@ function getHeroStyle(food) {
   return `--hero-left:${hero.x * 100}%;--hero-top:${hero.y * 100}%;--hero-width:${hero.w * 100}%;--hero-height:${hero.h * 100}%;`;
 }
 
-function renderHeroSceneItems(foods) {
-  return foods.map((food) => {
-    const name = escapeHtml(food.name);
-    const image = escapeHtml(food.image);
-
-    return `
-      <div
-        class="hero-food-scene-item"
-        data-food-id="${escapeHtml(food.id)}"
-        style="${getHeroStyle(food)}"
-      >
-        <img class="hero-food-img" src="${image}" alt="${name}" loading="lazy" />
-      </div>
-    `;
-  }).join("");
-}
-
 function renderDetectionBoxes(foods, highlightedFoodId = "") {
   return foods.map((food, index) => {
     const pill = getFreshnessPill(food);
@@ -535,9 +518,6 @@ function renderDetectionOverlay(foods, highlightedFoodId = "") {
   }
 
   return `
-    <div class="hero-scene-layer" aria-hidden="true">
-      ${renderHeroSceneItems(foods)}
-    </div>
     <div class="detection-layer${CALIBRATE ? " is-calibrating" : ""}" aria-hidden="true">
       ${renderDetectionBoxes(foods, highlightedFoodId)}
     </div>
