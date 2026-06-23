@@ -103,8 +103,24 @@ assert.strictEqual(filterFoodsByCategory(foods, CATEGORIES.ALL).length, 9);
 assert.strictEqual(filterFoodsByCategory(foods, CATEGORIES.MEAT_EGG_DAIRY).length, 5);
 assert.strictEqual(filterFoodsByCategory(foods, CATEGORIES.FRUIT_VEG).length, 3);
 assert.strictEqual(filterFoodsByCategory(foods, CATEGORIES.DRINK).length, 1);
-assert.strictEqual(filterFoodsByCategory(foods, CATEGORIES.FROZEN).length, 1);
+assert.strictEqual(filterFoodsByCategory(foods, CATEGORIES.FROZEN).length, 0);
 assert.strictEqual(countUrgentReminders(foods), 7);
+
+const expectedLocations = {
+  beef: "冷藏室",
+  eggs: "冷藏室",
+  milk: "冷藏室",
+  yogurt: "冷藏室",
+  chicken: "冷藏室",
+  blueberry: "冷藏室",
+  lettuce: "冷藏室",
+  tomato: "冷藏室",
+  orangeJuice: "门架",
+};
+
+for (const [foodId, location] of Object.entries(expectedLocations)) {
+  assert.strictEqual(getFoodById(foodId).location, location, `${foodId} should display the requested location`);
+}
 
 const drink = filterFoodsByCategory(foods, CATEGORIES.DRINK)[0];
 assert.strictEqual(drink.id, "orangeJuice");
